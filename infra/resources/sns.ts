@@ -25,7 +25,7 @@ export default class SnsConstruct extends Construct {
             displayName: 'eKYC Approval Topic',
         })
 
-        this.approvalTopic.addSubscription(new subscriptions.EmailSubscription('elginlam@amazon.com'))
+        //this.approvalTopic.addSubscription(new subscriptions.EmailSubscription('youremail@domain.com'))
 
         new core.CfnOutput(this, "approvalTopic", {
             value: this.approvalTopic.topicArn
@@ -35,27 +35,11 @@ export default class SnsConstruct extends Construct {
             displayName: 'eKYC Labelling Topic',
         })
 
-        this.labellersTopic.addSubscription(new subscriptions.EmailSubscription('elginlam@amazon.com'))
+        // this.labellersTopic.addSubscription(new subscriptions.EmailSubscription('youremail@domain.com'))
 
         new core.CfnOutput(this, "labellingTopic", {
             value: this.labellersTopic.topicArn
         });
-
-
-        /*
-           props.groundTruthRole.addToPrincipalPolicy(
-               new iam.PolicyStatement({
-                 resources: [this.approvalTopic.topicArn],
-                 actions: ["sns:Publish"],
-               })
-             );
-
-             props.groundTruthRole.addToPrincipalPolicy(
-               new iam.PolicyStatement({
-                 resources: [this.labellersTopic.topicArn],
-                 actions: ["sns:Publish"],
-               })
-             );*/
 
         const policyStatementApproval = new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,

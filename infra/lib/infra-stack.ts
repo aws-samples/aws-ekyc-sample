@@ -21,6 +21,7 @@ import {ParamStoreConstruct} from "../resources/param-store";
 import SnsConstruct from "../resources/sns";
 import WorkteamConstruct from "../resources/workteam";
 import EventConstructs from "../resources/events";
+import { Stack } from "@aws-cdk/core";
 
 export class EkycInfraStack extends cdk.Stack {
 
@@ -51,10 +52,7 @@ export class EkycInfraStack extends cdk.Stack {
             labellersGroup: identity.labellersGroup,
             trainingBucket: storage.trainingBucket
         })
-
-        //const manualApprovalWorkflow = new ManualApprovalWorkflowConstruct(this,'manual-approval-workflow')
-
-
+        
         const param_store = new ParamStoreConstruct(this, "parameters", {})
 
         const api = new ekycApiConstruct(this, "ekyc-api", {
@@ -83,5 +81,11 @@ export class EkycInfraStack extends cdk.Stack {
                 trainingTable: storage.trainingTable,
                 trainingBucket: storage.trainingBucket
             })
+
+        new cdk.CfnOutput(this, "DeploymentRegion", {
+                value: Stack.of(this).region,
+                description: "The region that this stack has been deployed in.",
+                exportName: "deploymentRegion",
+        });
     }
 }

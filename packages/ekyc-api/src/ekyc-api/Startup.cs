@@ -94,8 +94,8 @@ namespace ekyc_api
                     TermsOfService = new Uri("https://example.com/terms"),
                     Contact = new OpenApiContact
                     {
-                        Name = "Elgin Lam",
-                        Email = "elginlam@amazon.com",
+                        Name = "Amazon Web Services",
+                        Email = "opensource-codeofconduct@amazon.com",
                         Url = new Uri("https://aws.amazon.com")
                     },
                     License = new OpenApiLicense

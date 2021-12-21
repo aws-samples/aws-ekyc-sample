@@ -3,7 +3,7 @@ import path from 'path'
 import cdkOutput from '../output.json'
 
 interface IConfig {
-    region: string,
+    region?: string,
     mandatorySignIn: boolean,
     userPoolId?: string,
     userPoolWebClientId?: string,
@@ -23,7 +23,6 @@ export default class AmplifyConfigWriter  {
         console.log('Reading configuration from CDK output')
 
         const configOutput: IConfig = {
-            region: "ap-southeast-1",
             authenticationFlowType: "USER_PASSWORD_AUTH",
             mandatorySignIn: true
         }
@@ -35,6 +34,8 @@ export default class AmplifyConfigWriter  {
                 configOutput.userPoolId = value
             else if (key.startsWith('ekycapiekycdataapi'))
                 configOutput.dataApiEndpoint = value
+            else if (key==='DeploymentRegion')
+                configOutput.region = value
         }
 
         const absPath = path.resolve('../ui/src/config.json')

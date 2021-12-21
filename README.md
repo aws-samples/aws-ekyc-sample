@@ -75,9 +75,10 @@ Run the `one-step-deploy.sh` script in the base folder. You might need to provid
 
 Ensure your AWS credentials are setup in the CLI by running `aws configure`.
 
-## Getting Help
+## Contributing
 
-Please contact Elgin Lam (elginlam@amazon.com) for questions.
+Contributing guidelines are available [here](CONTRIBUTING.md)
 
+# License
 
-
+This project is licensed under MIT-0. View license terms [here](LICENSE.md)

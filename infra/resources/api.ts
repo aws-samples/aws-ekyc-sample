@@ -271,7 +271,7 @@ export default class EKYCApiConstruct extends Construct {
             visibilityConfig: {
                 cloudWatchMetricsEnabled: true,
                 metricName: `waf-metric-${name}`,
-                sampledRequestsEnabled: true, // TODO: review this
+                sampledRequestsEnabled: true,
             },
             rules: [
                 {

@@ -25,7 +25,7 @@ document.title = 'eKYC demo'
 Amplify.configure({
     // OPTIONAL - if your API requires authentication
     Auth: {
-        region:'ap-southeast-1',
+        region:config.region,
         mandatorySignIn:true,
         userPoolId: config.userPoolId,
         userPoolWebClientId: config.userPoolWebClientId,
@@ -35,8 +35,7 @@ Amplify.configure({
         endpoints: [
             {
                 name: "ekycApi",
-                endpoint: "https://demjt2pum7.execute-api.ap-southeast-1.amazonaws.com/prod",
-                //  endpoint: "https://localhost:5001",
+                endpoint: config.dataApiEndpoint,
                 region: 'ap-southeast-1',
                 custom_header: async () => {
                     return {Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`}
