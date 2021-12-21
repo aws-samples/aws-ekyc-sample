@@ -4,7 +4,7 @@ This is an "electronic know your customer" solution that is designed to help you
 
 ## What is eKYC?
 
-eKYC (electronic know-your-customer) is a way of process where institutions like banks, telcos and government entities can verify the identity of a person remotely. This includes the following capabilities:
+eKYC (electronic know-your-customer) is a process where institutions like banks, telcos and government entities can verify the identity of a person remotely. This solution includes the following capabilities:
 
 - Identifying types of documents
 - Identitying and extracting data from documents
