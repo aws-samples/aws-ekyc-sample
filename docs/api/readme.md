@@ -129,9 +129,3 @@ The solution makes use of the [dependency injection framework](https://docs.micr
 
 The solution uses the AWS .NET SDK to communicate with AWS services. AWS services also utilise the dependency injection concept as stated [here](https://aws.amazon.com/blogs/developer/working-with-dependency-injection-in-net-standard-inject-your-aws-clients-part-1/).
 
-
-## Getting Help
-
-Please contact Elgin Lam (elginlam@amazon.com) for questions.
-
-
