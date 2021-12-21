@@ -23,43 +23,43 @@ namespace ekyc_api
         public static void SetEnvVars()
         {
             Environment.SetEnvironmentVariable("SessionTable",
-                "EkycInfraStack-storageSessions515A5702-XWXPR91G8VY3");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("DataRequestsTable",
-                "EkycInfraStack-storageDataRequestsF5098A37-SQFHLBCCVO6A");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("VerificationHistoryTable",
-                "EkycInfraStack-storageVerificationHistoryB8330F3D-16F7DUUZV5IU");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("StorageBucket",
-                "ekycinfrastack-storagestoragebucketb86286fa-stjknmdcaz2z");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("RekognitionDocumentTypesArn",
-                "arn:aws:rekognition:ap-southeast-1:094168707463:project/eKYC/version/eKYC.2021-10-21T20.52.22/1634820742781");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("ApprovalsSnsTopic",
-                "arn:aws:sns:ap-southeast-1:331188376512:EkycInfraStack-topicsekycapprovaltopic27D1BBB1-SR58ST9X0O9X");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("RekognitionArnParameterName",
-                "CFN-parametersekycrekognitionarn7746EDAA-5xElptoOgqbg");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("GroundTruthUiTemplateS3Uri",
-                "s3://sagemaker-data-020220201/labellers.html");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("TrainingBucket",
-                "sagemaker-data-020220201");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("TrainingTableName",
-                "EkycInfraStack-storageTrainingJobs6DCD8424-PAMGF7VSGMVH");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("GroundTruthRoleArn",
-                "arn:aws:iam::331188376512:role/GroundTruthArn");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("GroundTruthUiTemplateS3Uri",
-                "s3://sagemaker-data-020220201/workertemplate.html");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("GroundTruthWorkteamArn",
-                "arn:aws:sagemaker:ap-southeast-1:331188376512:workteam/private-crowd/labellers");
+                "<REPLACE>");
 
             Environment.SetEnvironmentVariable("Environment", "Unit Test");
         }
