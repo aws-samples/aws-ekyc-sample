@@ -32,7 +32,7 @@ Support for additional document types can be added, please view the instructions
 
 ### Face Extraction
 
-This extracts faces from documents, returning the resultant image in a Base64 format.
+This extracts faces from documents, returning the resulting image in a Base64 format.
 
 ### Liveness Detection
 
