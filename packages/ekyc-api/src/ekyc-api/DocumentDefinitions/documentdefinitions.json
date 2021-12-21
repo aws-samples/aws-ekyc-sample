@@ -1,0 +1,200 @@
+{
+  "DocumentTypes": [
+    {
+      "Name": "MY_NRIC",
+      "FullName": "Malaysian NRIC",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [
+        {
+          "Name": "MyKadLogo",
+          "ExpectedBoundingBox": {
+            "Left": 0.58,
+            "Width": 0.15,
+            "Top": 0.00,
+            "Height": 0.21
+          }
+        },
+        {
+          "Name": "MalaysianFlag",
+          "ExpectedBoundingBox": {
+            "Left": 0.75,
+            "Width": 0.21,
+            "Top": 0.0199,
+            "Height": 0.183
+          }
+        },
+        {
+          "Name": "Chip",
+          "ExpectedBoundingBox": {
+            "Left": 0.0975,
+            "Width": 0.158,
+            "Top": 0.323,
+            "Height": 0.235
+          }
+        }
+      ],
+      "DataFields": [
+        {
+          "Name": "Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.0375,
+            "Width": 0.5925,
+            "Top": 0.6454,
+            "Height": 0.1036
+          }
+        }
+      ]
+    },
+    {
+      "Name": "ID_KTP",
+      "FullName": "Indonesian KTP",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": []
+    },
+    {
+      "Name": "AU_PASSPORT",
+      "FullName": "Australian Passport",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": []
+    },
+    {
+      "Name": "SG_PASSPORT",
+      "FullName": "Singapore Passport",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": [
+        {
+          "Name": "Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.28,
+            "Width": 0.517,
+            "Top": 0.222,
+            "Height": 0.0781
+          }
+        },
+        {
+          "Name": "DateOfBirth",
+          "ExpectedBoundingBox": {
+            "Left": 0.29,
+            "Width": 0.1635,
+            "Top": 0.4103,
+            "Height": 0.041
+          },
+          "RegexExpression": "^\\d{1,2}\\s\\w{3}\\s\\d{4}$"
+        },
+        {
+          "Name": "ExpiryDate",
+          "ExpectedBoundingBox": {
+            "Left": 0.28,
+            "Width": 0.17,
+            "Top": 0.536,
+            "Height": 0.04
+          },
+          "RegexExpression": "^\\d{1,2}\\s\\w{3}\\s\\d{4}$"
+        }
+      ]
+    },
+    {
+      "Name": "PRC_PASSPORT",
+      "FullName": "Chinese Passport",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": [
+        {
+          "Name": "Passport Number",
+          "ExpectedBoundingBox": {
+            "Left": 0.7067,
+            "Width": 0.2438,
+            "Top": 0.0610,
+            "Height": 0.0632
+          },
+          "RegexExpression": "^\\w{1}\\d{8}$"
+        },
+        {
+          "Name": "Place of Birth",
+          "ExpectedBoundingBox": {
+            "Left": 0.6717,
+            "Width": 0.2438,
+            "Top": 0.2911,
+            "Height": 0.0465
+          }
+        },
+        {
+          "Name": "Surname",
+          "ExpectedBoundingBox": {
+            "Left": 0.3722,
+            "Width": 0.3516,
+            "Top": 0.1965,
+            "Height": 0.0494
+          }
+        },
+        {
+          "Name": "Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.3791,
+            "Width": 0.4409,
+            "Top": 0.2924,
+            "Height": 0.0465
+          }
+        },
+        {
+          "Name": "DOB",
+          "ExpectedBoundingBox": {
+            "Left": 0.3125,
+            "Width": 0.2370,
+            "Top": 0.4782,
+            "Height": 0.0494
+          }
+        },
+        {
+          "Name": "DateOfIssue",
+          "ExpectedBoundingBox": {
+            "Left": 0.3159,
+            "Width": 0.2212,
+            "Top": 0.5721,
+            "Height": 0.0484
+          }
+        },
+        {
+          "Name": "Place Of Issue",
+          "ExpectedBoundingBox": {
+            "Left": 0.6717,
+            "Width": 0.2548,
+            "Top": 0.4831,
+            "Height": 0.0455
+          }
+        },
+        {
+          "Name": "Date of Expiry",
+          "ExpectedBoundingBox": {
+            "Left": 0.5996,
+            "Width": 0.2198,
+            "Top": 0.5663,
+            "Height": 0.0561
+          }
+        }
+      ]
+    },
+    {
+      "Name": "KH_IC",
+      "FullName": "Cambodian IC",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": []
+    }
+  ]
+}

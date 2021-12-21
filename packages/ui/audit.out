@@ -1,0 +1,217 @@
+# npm audit report
+
+ansi-html  *
+Severity: high
+Uncontrolled Resource Consumption in ansi-html - https://github.com/advisories/GHSA-whgm-jr23-g3j9
+fix available via `npm audit fix --force`
+Will install react-scripts@0.9.5, which is a breaking change
+node_modules/ansi-html
+  @pmmmwh/react-refresh-webpack-plugin  <=0.5.0-rc.6
+  Depends on vulnerable versions of ansi-html
+  node_modules/@pmmmwh/react-refresh-webpack-plugin
+    react-scripts  >=0.10.0-alpha.328cb32e
+    Depends on vulnerable versions of @pmmmwh/react-refresh-webpack-plugin
+    Depends on vulnerable versions of @svgr/webpack
+    Depends on vulnerable versions of optimize-css-assets-webpack-plugin
+    Depends on vulnerable versions of react-dev-utils
+    Depends on vulnerable versions of webpack
+    Depends on vulnerable versions of webpack-dev-server
+    node_modules/react-scripts
+  webpack-dev-server  2.0.0-beta - 4.1.0
+  Depends on vulnerable versions of ansi-html
+  Depends on vulnerable versions of chokidar
+  Depends on vulnerable versions of yargs
+  node_modules/webpack-dev-server
+
+ansi-regex  >2.1.1 <5.0.1
+Severity: moderate
+ Inefficient Regular Expression Complexity in chalk/ansi-regex - https://github.com/advisories/GHSA-93q8-gq69-wqmw
+fix available via `npm audit fix --force`
+Will install react-scripts@0.9.5, which is a breaking change
+node_modules/@aws-sdk/middleware-retry/node_modules/ansi-regex
+node_modules/ansi-fragments/node_modules/ansi-regex
+node_modules/ora/node_modules/ansi-regex
+node_modules/webpack-dev-server/node_modules/cliui/node_modules/ansi-regex
+node_modules/webpack-dev-server/node_modules/string-width/node_modules/ansi-regex
+node_modules/webpack-dev-server/node_modules/wrap-ansi/node_modules/ansi-regex
+  strip-ansi  4.0.0 - 5.2.0
+  Depends on vulnerable versions of ansi-regex
+  node_modules/@aws-sdk/middleware-retry/node_modules/strip-ansi
+  node_modules/ansi-fragments/node_modules/strip-ansi
+  node_modules/ora/node_modules/strip-ansi
+  node_modules/webpack-dev-server/node_modules/cliui/node_modules/strip-ansi
+  node_modules/webpack-dev-server/node_modules/string-width/node_modules/strip-ansi
+  node_modules/webpack-dev-server/node_modules/wrap-ansi/node_modules/strip-ansi
+    @react-native-community/cli  2.0.0-alpha.1 - 2.0.0-rc.5 || >=2.0.1
+    Depends on vulnerable versions of @react-native-community/cli-hermes
+    Depends on vulnerable versions of @react-native-community/cli-types
+    Depends on vulnerable versions of ora
+    Depends on vulnerable versions of strip-ansi
+    node_modules/@aws-sdk/middleware-retry/node_modules/@react-native-community/cli
+      react-native  <=0.0.0-ffdfbbec0 || >=0.60.0-rc.0
+      Depends on vulnerable versions of @react-native-community/cli
+      Depends on vulnerable versions of @react-native-community/cli-platform-android
+      node_modules/@aws-sdk/middleware-retry/node_modules/react-native
+    ansi-fragments  *
+    Depends on vulnerable versions of strip-ansi
+    node_modules/ansi-fragments
+      logkitty  *
+      Depends on vulnerable versions of ansi-fragments
+      node_modules/logkitty
+        @react-native-community/cli-platform-android  *
+        Depends on vulnerable versions of logkitty
+        node_modules/@react-native-community/cli-platform-android
+          @react-native-community/cli-hermes  *
+          Depends on vulnerable versions of @react-native-community/cli-platform-android
+          node_modules/@react-native-community/cli-hermes
+    cliui  4.0.0 - 5.0.0
+    Depends on vulnerable versions of strip-ansi
+    Depends on vulnerable versions of wrap-ansi
+    node_modules/webpack-dev-server/node_modules/cliui
+      yargs  10.1.0 - 15.0.0
+      Depends on vulnerable versions of cliui
+      Depends on vulnerable versions of string-width
+      node_modules/webpack-dev-server/node_modules/yargs
+        webpack-dev-server  2.0.0-beta - 4.1.0
+        Depends on vulnerable versions of ansi-html
+        Depends on vulnerable versions of chokidar
+        Depends on vulnerable versions of yargs
+        node_modules/webpack-dev-server
+          react-scripts  >=0.10.0-alpha.328cb32e
+          Depends on vulnerable versions of @pmmmwh/react-refresh-webpack-plugin
+          Depends on vulnerable versions of @svgr/webpack
+          Depends on vulnerable versions of optimize-css-assets-webpack-plugin
+          Depends on vulnerable versions of react-dev-utils
+          Depends on vulnerable versions of webpack
+          Depends on vulnerable versions of webpack-dev-server
+          node_modules/react-scripts
+    ora  2.0.0 - 4.0.2
+    Depends on vulnerable versions of strip-ansi
+    node_modules/ora
+      @react-native-community/cli-types  >=5.0.0-alpha.0
+      Depends on vulnerable versions of ora
+      node_modules/@react-native-community/cli-types
+    string-width  2.1.0 - 4.1.0
+    Depends on vulnerable versions of strip-ansi
+    node_modules/webpack-dev-server/node_modules/string-width
+      wrap-ansi  3.0.0 - 6.1.0
+      Depends on vulnerable versions of string-width
+      Depends on vulnerable versions of strip-ansi
+      node_modules/webpack-dev-server/node_modules/wrap-ansi
+
+browserslist  4.0.0 - 4.16.4
+Severity: moderate
+Regular Expression Denial of Service in browserslist - https://github.com/advisories/GHSA-w8qv-6jwh-64r5
+fix available via `npm audit fix --force`
+Will install react-scripts@0.9.5, which is a breaking change
+node_modules/react-dev-utils/node_modules/browserslist
+  react-dev-utils  6.0.0-next.03604a46 - 12.0.0-next.37
+  Depends on vulnerable versions of browserslist
+  Depends on vulnerable versions of immer
+  node_modules/react-dev-utils
+    react-scripts  >=0.10.0-alpha.328cb32e
+    Depends on vulnerable versions of @pmmmwh/react-refresh-webpack-plugin
+    Depends on vulnerable versions of @svgr/webpack
+    Depends on vulnerable versions of optimize-css-assets-webpack-plugin
+    Depends on vulnerable versions of react-dev-utils
+    Depends on vulnerable versions of webpack
+    Depends on vulnerable versions of webpack-dev-server
+    node_modules/react-scripts
+
+glob-parent  <5.1.2
+Severity: high
+Regular expression denial of service - https://github.com/advisories/GHSA-ww39-953v-wcq6
+fix available via `npm audit fix --force`
+Will install react-scripts@0.9.5, which is a breaking change
+node_modules/chokidar/node_modules/glob-parent
+  chokidar  1.0.0-rc1 - 2.1.8
+  Depends on vulnerable versions of glob-parent
+  node_modules/chokidar
+    watchpack-chokidar2  *
+    Depends on vulnerable versions of chokidar
+    node_modules/watchpack-chokidar2
+      watchpack  1.7.2 - 1.7.5
+      Depends on vulnerable versions of watchpack-chokidar2
+      node_modules/watchpack
+        webpack  4.44.0 - 4.46.0
+        Depends on vulnerable versions of watchpack
+        node_modules/webpack
+          react-scripts  >=0.10.0-alpha.328cb32e
+          Depends on vulnerable versions of @pmmmwh/react-refresh-webpack-plugin
+          Depends on vulnerable versions of @svgr/webpack
+          Depends on vulnerable versions of optimize-css-assets-webpack-plugin
+          Depends on vulnerable versions of react-dev-utils
+          Depends on vulnerable versions of webpack
+          Depends on vulnerable versions of webpack-dev-server
+          node_modules/react-scripts
+    webpack-dev-server  2.0.0-beta - 4.1.0
+    Depends on vulnerable versions of ansi-html
+    Depends on vulnerable versions of chokidar
+    Depends on vulnerable versions of yargs
+    node_modules/webpack-dev-server
+
+immer  <9.0.6
+Severity: critical
+Prototype Pollution in immer - https://github.com/advisories/GHSA-33f9-j839-rf8h
+fix available via `npm audit fix --force`
+Will install react-scripts@0.9.5, which is a breaking change
+node_modules/immer
+  react-dev-utils  6.0.0-next.03604a46 - 12.0.0-next.37
+  Depends on vulnerable versions of browserslist
+  Depends on vulnerable versions of immer
+  node_modules/react-dev-utils
+    react-scripts  >=0.10.0-alpha.328cb32e
+    Depends on vulnerable versions of @pmmmwh/react-refresh-webpack-plugin
+    Depends on vulnerable versions of @svgr/webpack
+    Depends on vulnerable versions of optimize-css-assets-webpack-plugin
+    Depends on vulnerable versions of react-dev-utils
+    Depends on vulnerable versions of webpack
+    Depends on vulnerable versions of webpack-dev-server
+    node_modules/react-scripts
+
+nth-check  <2.0.1
+Severity: moderate
+Inefficient Regular Expression Complexity in nth-check - https://github.com/advisories/GHSA-rp65-9cf3-cjxr
+fix available via `npm audit fix --force`
+Will install react-scripts@0.9.5, which is a breaking change
+node_modules/svgo/node_modules/nth-check
+  css-select  <=3.1.0
+  Depends on vulnerable versions of nth-check
+  node_modules/svgo/node_modules/css-select
+    svgo  1.0.0 - 1.3.2
+    Depends on vulnerable versions of css-select
+    node_modules/svgo
+      @svgr/plugin-svgo  <=5.5.0
+      Depends on vulnerable versions of svgo
+      node_modules/@svgr/plugin-svgo
+        @svgr/webpack  4.0.0 - 5.5.0
+        Depends on vulnerable versions of @svgr/plugin-svgo
+        node_modules/@svgr/webpack
+          react-scripts  >=0.10.0-alpha.328cb32e
+          Depends on vulnerable versions of @pmmmwh/react-refresh-webpack-plugin
+          Depends on vulnerable versions of @svgr/webpack
+          Depends on vulnerable versions of optimize-css-assets-webpack-plugin
+          Depends on vulnerable versions of react-dev-utils
+          Depends on vulnerable versions of webpack
+          Depends on vulnerable versions of webpack-dev-server
+          node_modules/react-scripts
+      postcss-svgo  4.0.0-nightly.2020.1.9 - 5.0.0-rc.2
+      Depends on vulnerable versions of svgo
+      node_modules/postcss-svgo
+        cssnano-preset-default  <=4.0.8
+        Depends on vulnerable versions of postcss-svgo
+        node_modules/cssnano-preset-default
+          cssnano  4.0.0-nightly.2020.1.9 - 4.1.11
+          Depends on vulnerable versions of cssnano-preset-default
+          node_modules/cssnano
+            optimize-css-assets-webpack-plugin  3.2.1 || 5.0.0 - 5.0.8
+            Depends on vulnerable versions of cssnano
+            node_modules/optimize-css-assets-webpack-plugin
+
+35 vulnerabilities (24 moderate, 9 high, 2 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force

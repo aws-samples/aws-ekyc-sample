@@ -1,0 +1,25 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-ekyc-dev-170743-authRole",
+      "UnauthRoleArn": "arn:aws:iam::042845985382:role/amplify-ekyc-dev-170743-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::042845985382:role/amplify-ekyc-dev-170743-authRole",
+      "Region": "ap-southeast-1",
+      "DeploymentBucketName": "amplify-ekyc-dev-170743-deployment",
+      "UnauthRoleName": "amplify-ekyc-dev-170743-unauthRole",
+      "StackName": "amplify-ekyc-dev-170743",
+      "StackId": "arn:aws:cloudformation:ap-southeast-1:042845985382:stack/amplify-ekyc-dev-170743/3c13f0b0-1084-11ec-8fae-0a632af20480",
+      "AmplifyAppId": "d2v9sd62forq2e"
+    },
+    "categories": {
+      "auth": {
+        "ekycc56d9df9": {
+          "userPoolId": "ap-southeast-1_ELUawjj8s",
+          "userPoolName": "ekyc-user-pool",
+          "webClientId": "7h9hub4555kummt9bscvdqb2r8",
+          "nativeClientId": "7h9hub4555kummt9bscvdqb2r8"
+        }
+      }
+    }
+  }
+}

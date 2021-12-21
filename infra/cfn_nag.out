@@ -1,0 +1,110 @@
+------------------------------------------------------------
+cdk.out/EkycInfraStack.template.json
+------------------------------------------------------------------------------------------------------------------------
+[33m| WARN W68[0m
+[33m|[0m
+[33m| Resource: ["ekycapiekycdataapic8938b7df4d45f02729def30bb8a7d9970465a1792DeploymentB9033C4F6a6d1363d407849f80ce7ed24aece408"][0m
+[33m| Line Numbers: [2663][0m
+[33m|[0m
+[33m| AWS::ApiGateway::Deployment resources should be associated with an AWS::ApiGateway::UsagePlan. [0m
+------------------------------------------------------------
+[33m| WARN W69[0m
+[33m|[0m
+[33m| Resource: ["ekycapiekycdataapic8938b7df4d45f02729def30bb8a7d9970465a1792DeploymentStageprod9353301D", "ekycapidevstage7E0AD487", "ekycapiteststage8991420A", "ekycapiuatstage19B4A1DC"][0m
+[33m| Line Numbers: [2682, 3098, 3113, 3128][0m
+[33m|[0m
+[33m| AWS::ApiGateway::Stage should have the AccessLogSetting property defined.[0m
+------------------------------------------------------------
+[33m| WARN W64[0m
+[33m|[0m
+[33m| Resource: ["ekycapiekycdataapic8938b7df4d45f02729def30bb8a7d9970465a1792DeploymentStageprod9353301D"][0m
+[33m| Line Numbers: [2682][0m
+[33m|[0m
+[33m| AWS::ApiGateway::Stage resources should be associated with an AWS::ApiGateway::UsagePlan. [0m
+------------------------------------------------------------
+[33m| WARN W10[0m
+[33m|[0m
+[33m| Resource: ["webappjswebdistributionCFDistribution59824C8A", "swaggerswaggerdistributionCFDistributionDC90E2C9"][0m
+[33m| Line Numbers: [932, 3437][0m
+[33m|[0m
+[33m| CloudFront Distribution should enable access logging[0m
+------------------------------------------------------------
+[33m| WARN W70[0m
+[33m|[0m
+[33m| Resource: ["webappjswebdistributionCFDistribution59824C8A", "swaggerswaggerdistributionCFDistributionDC90E2C9"][0m
+[33m| Line Numbers: [932, 3437][0m
+[33m|[0m
+[33m| Cloudfront should use minimum protocol version TLS 1.2[0m
+------------------------------------------------------------
+[33m| WARN W78[0m
+[33m|[0m
+[33m| Resource: ["storageSessions515A5702", "storageDataRequestsF5098A37", "storageTrainingJobs6DCD8424", "storageVerificationHistoryB8330F3D"][0m
+[33m| Line Numbers: [695, 725, 755, 799][0m
+[33m|[0m
+[33m| DynamoDB table should have backup enabled, should be set using PointInTimeRecoveryEnabled[0m
+------------------------------------------------------------
+[33m| WARN W12[0m
+[33m|[0m
+[33m| Resource: ["CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF", "identityGroundTruthRoleDefaultPolicy53477035", "ekycapiekycproxyhandlerServiceRoleDefaultPolicy9E8CBCB6"][0m
+[33m| Line Numbers: [1150, 1769, 2195][0m
+[33m|[0m
+[33m| IAM policy should not allow * resource[0m
+------------------------------------------------------------
+[33m| WARN W58[0m
+[33m|[0m
+[33m| Resource: ["CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F", "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536", "ekycapiekycproxyhandlerD9FA9D66", "eventtriggersgroundtrutheventchangehandler82C23C83", "eventtriggerscheckdatasethandler4A0254CA"][0m
+[33m| Line Numbers: [850, 1399, 2413, 3729, 3932][0m
+[33m|[0m
+[33m| Lambda functions require permission to write CloudWatch Logs[0m
+------------------------------------------------------------
+[33m| WARN W89[0m
+[33m|[0m
+[33m| Resource: ["CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F", "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536", "ekycapiekycproxyhandlerD9FA9D66", "eventtriggersgroundtrutheventchangehandler82C23C83", "eventtriggerscheckdatasethandler4A0254CA"][0m
+[33m| Line Numbers: [850, 1399, 2413, 3729, 3932][0m
+[33m|[0m
+[33m| Lambda functions should be deployed inside a VPC[0m
+------------------------------------------------------------
+[33m| WARN W92[0m
+[33m|[0m
+[33m| Resource: ["CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F", "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536", "ekycapiekycproxyhandlerD9FA9D66", "eventtriggersgroundtrutheventchangehandler82C23C83", "eventtriggerscheckdatasethandler4A0254CA"][0m
+[33m| Line Numbers: [850, 1399, 2413, 3729, 3932][0m
+[33m|[0m
+[33m| Lambda functions should define ReservedConcurrentExecutions to reserve simultaneous executions[0m
+------------------------------------------------------------
+[33m| WARN W28[0m
+[33m|[0m
+[33m| Resource: ["ekycapiEkycAPIkeyCBC50C4E"][0m
+[33m| Line Numbers: [3143][0m
+[33m|[0m
+[33m| Resource found with an explicit name, this disallows updates that require replacement of this resource[0m
+------------------------------------------------------------
+[33m| WARN W35[0m
+[33m|[0m
+[33m| Resource: ["storagedeployBucketB61B3C55", "storagestorageBucketB86286FA", "storageswaggerBucketC75FADBA", "storagetrainingBucketF044F5ED", "storageuihostingbucketB2F58A5E"][0m
+[33m| Line Numbers: [4, 105, 232, 397, 517][0m
+[33m|[0m
+[33m| S3 Bucket should have access logging configured[0m
+------------------------------------------------------------
+[33m| WARN W41[0m
+[33m|[0m
+[33m| Resource: ["storageuihostingbucketB2F58A5E"][0m
+[33m| Line Numbers: [517][0m
+[33m|[0m
+[33m| S3 Bucket should have encryption option set[0m
+------------------------------------------------------------
+[33m| WARN W76[0m
+[33m|[0m
+[33m| Resource: ["CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF", "ekycapiekycproxyhandlerServiceRoleDefaultPolicy9E8CBCB6"][0m
+[33m| Line Numbers: [1150, 2195][0m
+[33m|[0m
+[33m| SPCM for IAM policy document is higher than 25[0m
+------------------------------------------------------------
+[33m| WARN W47[0m
+[33m|[0m
+[33m| Resource: ["topicsekycapprovaltopic27D1BBB1", "topicsekyclabellingtopic0A3A8A49"][0m
+[33m| Line Numbers: [1853, 1904][0m
+[33m|[0m
+[33m| SNS Topic should specify KmsMasterKeyId property[0m
+
+Failures count: 0
+Warnings count: 43

@@ -1,0 +1,66 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ekyc-api", "src\ekyc-api\ekyc-api.csproj", "{39AA526E-677C-4A9F-8429-1C0695000E6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ekyc-api-tests", "test\ekyc-api-tests\ekyc-api-tests.csproj", "{5A444FD9-6C52-4971-94AC-31C0ECBA8E21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base64Encoder", "..\Base64Encoder\Base64Encoder.csproj", "{6F803C13-7DAD-485A-A115-9A91A2B9F0D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundTruthJobHandler", "..\lambdas\GroundTruthJobHandler\src\GroundTruthJobHandler\GroundTruthJobHandler.csproj", "{44092CBD-E2F8-488B-9D0A-BB940B985DC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GroundTruthHandler", "GroundTruthHandler", "{F63D5A24-1311-4E70-8B1A-493861A84915}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroundTruthJobHandler.Tests", "..\lambdas\GroundTruthJobHandler\test\GroundTruthJobHandler.Tests\GroundTruthJobHandler.Tests.csproj", "{47525A16-910F-4EC5-B158-FEC104364F63}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{23D83779-2F6C-46DC-B134-660EA2EFCE2B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CheckRekognitionProject", "CheckRekognitionProject", "{70AEA04D-9CF1-41B1-9C0A-386766243AA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckRekognitionProject.Tests", "..\lambdas\CheckRekognitionProject\test\CheckRekognitionProject.Tests\CheckRekognitionProject.Tests.csproj", "{06D3AE84-408A-4681-B1A0-8F8D680A7323}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckRekognitionProject", "..\lambdas\CheckRekognitionProject\src\CheckRekognitionProject\CheckRekognitionProject.csproj", "{059E6757-D99E-43FF-9E68-989C2C85E34C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{39AA526E-677C-4A9F-8429-1C0695000E6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39AA526E-677C-4A9F-8429-1C0695000E6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39AA526E-677C-4A9F-8429-1C0695000E6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39AA526E-677C-4A9F-8429-1C0695000E6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A444FD9-6C52-4971-94AC-31C0ECBA8E21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A444FD9-6C52-4971-94AC-31C0ECBA8E21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A444FD9-6C52-4971-94AC-31C0ECBA8E21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A444FD9-6C52-4971-94AC-31C0ECBA8E21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F803C13-7DAD-485A-A115-9A91A2B9F0D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F803C13-7DAD-485A-A115-9A91A2B9F0D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F803C13-7DAD-485A-A115-9A91A2B9F0D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F803C13-7DAD-485A-A115-9A91A2B9F0D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44092CBD-E2F8-488B-9D0A-BB940B985DC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44092CBD-E2F8-488B-9D0A-BB940B985DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44092CBD-E2F8-488B-9D0A-BB940B985DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44092CBD-E2F8-488B-9D0A-BB940B985DC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47525A16-910F-4EC5-B158-FEC104364F63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47525A16-910F-4EC5-B158-FEC104364F63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47525A16-910F-4EC5-B158-FEC104364F63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47525A16-910F-4EC5-B158-FEC104364F63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06D3AE84-408A-4681-B1A0-8F8D680A7323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06D3AE84-408A-4681-B1A0-8F8D680A7323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06D3AE84-408A-4681-B1A0-8F8D680A7323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06D3AE84-408A-4681-B1A0-8F8D680A7323}.Release|Any CPU.Build.0 = Release|Any CPU
+		{059E6757-D99E-43FF-9E68-989C2C85E34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{059E6757-D99E-43FF-9E68-989C2C85E34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{059E6757-D99E-43FF-9E68-989C2C85E34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{059E6757-D99E-43FF-9E68-989C2C85E34C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{44092CBD-E2F8-488B-9D0A-BB940B985DC0} = {F63D5A24-1311-4E70-8B1A-493861A84915}
+		{47525A16-910F-4EC5-B158-FEC104364F63} = {F63D5A24-1311-4E70-8B1A-493861A84915}
+		{39AA526E-677C-4A9F-8429-1C0695000E6A} = {23D83779-2F6C-46DC-B134-660EA2EFCE2B}
+		{5A444FD9-6C52-4971-94AC-31C0ECBA8E21} = {23D83779-2F6C-46DC-B134-660EA2EFCE2B}
+		{06D3AE84-408A-4681-B1A0-8F8D680A7323} = {70AEA04D-9CF1-41B1-9C0A-386766243AA4}
+		{059E6757-D99E-43FF-9E68-989C2C85E34C} = {70AEA04D-9CF1-41B1-9C0A-386766243AA4}
+	EndGlobalSection
+EndGlobal

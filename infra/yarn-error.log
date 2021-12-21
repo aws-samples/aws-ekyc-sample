@@ -1,0 +1,83 @@
+Arguments: 
+  /usr/local/bin/node /Users/elginlam/.yarn/bin/yarn.js install
+
+PATH: 
+  /Users/elginlam/.yarn/bin:/Users/elginlam/.config/yarn/global/node_modules/.bin:/Users/elginlam/.toolbox/bin:/opt/anaconda3/bin:/opt/anaconda3/condabin:/Users/elginlam/.serverless/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/SonarQube/bin:/usr/local/go/bin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
+
+Yarn version: 
+  1.22.15
+
+Node version: 
+  14.17.5
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Invariant Violation: expected hoisted manifest for "@cloudcomponents/cdk-static-website#@aws-cdk/aws-cloudfront#@aws-cdk/aws-ec2"
+      at invariant (/Users/elginlam/.yarn/lib/cli.js:2314:15)
+      at _loop2 (/Users/elginlam/.yarn/lib/cli.js:95102:9)
+      at PackageHoister.init (/Users/elginlam/.yarn/lib/cli.js:95172:19)
+      at PackageLinker.getFlatHoistedTree (/Users/elginlam/.yarn/lib/cli.js:48924:20)
+      at PackageLinker.<anonymous> (/Users/elginlam/.yarn/lib/cli.js:48935:27)
+      at Generator.next (<anonymous>)
+      at step (/Users/elginlam/.yarn/lib/cli.js:310:30)
+      at /Users/elginlam/.yarn/lib/cli.js:328:14
+      at new Promise (<anonymous>)
+      at new F (/Users/elginlam/.yarn/lib/cli.js:5301:28)
+
+npm manifest: 
+  {
+    "name": "infra",
+    "version": "0.1.0",
+    "bin": {
+      "infra": "bin/infra.js"
+    },
+    "scripts": {
+      "build": "tsc",
+      "watch": "tsc -w",
+      "test": "jest",
+      "cdk": "cdk"
+    },
+    "devDependencies": {
+      "@aws-cdk/assert": "1.130.0",
+      "@aws-cdk/aws-apigateway": "1.130.0",
+      "@aws-cdk/aws-cloudfront": "1.130.0",
+      "@aws-cdk/aws-cloudfront-origins": "1.130.0",
+      "@aws-cdk/aws-cognito": "1.130.0",
+      "@aws-cdk/aws-dynamodb": "1.130.0",
+      "@aws-cdk/aws-iam": "1.130.0",
+      "@aws-cdk/aws-lambda": "1.130.0",
+      "@aws-cdk/aws-s3": "1.130.0",
+      "@aws-cdk/aws-s3-deployment": "1.130.0",
+      "@types/jest": "26.0.10",
+      "@types/node": "10.17.27",
+      "aws-cdk": "1.130.0",
+      "jest": "26.4.2",
+      "ts-jest": "26.2.0",
+      "ts-node": "9.0.0",
+      "typescript": "~3.9.7"
+    },
+    "dependencies": {
+      "@aws-cdk/aws-appconfig": "1.130.0",
+      "@aws-cdk/aws-events": "1.130.0",
+      "@aws-cdk/aws-route53": "1.130.0",
+      "@aws-cdk/aws-sagemaker": "1.130.0",
+      "@aws-cdk/aws-sns": "1.130.0",
+      "@aws-cdk/aws-sns-subscriptions": "1.130.0",
+      "@aws-cdk/aws-ssm": "1.130.0",
+      "@aws-cdk/aws-stepfunctions": "1.130.0",
+      "@aws-cdk/aws-stepfunctions-tasks": "1.130.0",
+      "@aws-cdk/aws-wafv2": "1.130.0",
+      "@aws-cdk/core": "1.130.0",
+      "@aws-cdk/custom-resources": "1.130.0",
+      "@cloudcomponents/cdk-static-website": "1.42.0",
+      "source-map-support": "0.5.16"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
