@@ -26,13 +26,12 @@ export class IdentityConstructs extends cdk.Construct {
 
     public readonly groundTruthRole: iam.Role
 
-
     constructor(scope: cdk.Construct, id: string, props: IdentityConstructProps) {
         super(scope, id);
 
         // User Pool
         this.userPool = new cognito.UserPool(this, "userpool", {
-            userPoolName: "ekyc-user-pool",
+            userPoolName: `ekyc-pool`,
             selfSignUpEnabled: false,
             signInAliases: {
                 email: true,
@@ -101,8 +100,7 @@ export class IdentityConstructs extends cdk.Construct {
             .withCustomAttributes(...["country", "city"]);
 
         //  User Pool Client
-        this.userPoolClient = new cognito.UserPoolClient(this, "userpool-client", {
-            userPool: this.userPool,
+        this.userPoolClient = this.userPool.addClient( "userpool-client", {
             authFlows: {
                 adminUserPassword: true,
                 custom: true,
@@ -123,16 +121,14 @@ export class IdentityConstructs extends cdk.Construct {
             ]
         });
 
-        this.userPoolDomain = new UserPoolDomain(this, 'userpool-domain', {
-            userPool: this.userPool,
+        this.userPoolDomain = this.userPool.addDomain(`userpool-domain-${this.node.addr}`, {
             cognitoDomain: {
                 domainPrefix: `ekyc-prototype-${this.node.addr}`
             }
 
         })
 
-        this.labellersClient = new cognito.UserPoolClient(this, "labellers-client", {
-            userPool: this.userPool,
+        this.labellersClient = this.userPool.addClient( "labellers-client", {
             authFlows: {
                 adminUserPassword: true,
                 custom: true,
