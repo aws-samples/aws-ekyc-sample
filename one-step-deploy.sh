@@ -23,7 +23,6 @@ pushd infra
 yarn
 rm -rf output
 cdk synth --all -o output
-cfn_nag_scan -i cdk.out/EkycInfraStack.template.json
 cdk deploy --all --require-approval never --outputs-file output.json -vv --Debug
 popd
 #### Copy the CDK output to the right directories
@@ -39,6 +38,5 @@ pushd infra
 yarn 
 rm -rf output
 cdk synth --all -o output
-cfn_nag_scan -i cdk.out/EkycInfraStack.template.json
 cdk deploy --all --require-approval never --outputs-file output.json -vv --Debug
 popd
