@@ -1,8 +1,0 @@
-{
-    "region":"",
-    "authenticationFlowType":"USER_PASSWORD_AUTH",
-    "mandatorySignIn":true,
-    "userPoolId":"",
-    "dataApiEndpoint":"",
-    "userPoolWebClientId":""
- }
