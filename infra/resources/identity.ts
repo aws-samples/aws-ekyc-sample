@@ -16,7 +16,7 @@ export class IdentityConstructs extends cdk.Construct {
 
     public readonly userPoolClient: cognito.UserPoolClient;
 
-    public readonly userPoolDomain: cognito.UserPoolDomain
+   public readonly userPoolDomain: cognito.UserPoolDomain
 
     public readonly identityPool: cognito.CfnIdentityPool
 
@@ -101,8 +101,7 @@ export class IdentityConstructs extends cdk.Construct {
             .withCustomAttributes(...["country", "city"]);
 
         //  User Pool Client
-        this.userPoolClient = new cognito.UserPoolClient(this, "userpool-client", {
-            userPool: this.userPool,
+        this.userPoolClient = this.userPool.addClient( "userpool-client", {
             authFlows: {
                 adminUserPassword: true,
                 custom: true,
@@ -123,16 +122,13 @@ export class IdentityConstructs extends cdk.Construct {
             ]
         });
 
-        this.userPoolDomain = new UserPoolDomain(this, 'userpool-domain', {
-            userPool: this.userPool,
+        this.userPoolDomain = this.userPool.addDomain(`userpool-domain-${this.node.addr}`, {
             cognitoDomain: {
-                domainPrefix: `ekyc-prototype-${this.node.addr}`
+                domainPrefix: `${this.node.addr}`
             }
-
         })
 
-        this.labellersClient = new cognito.UserPoolClient(this, "labellers-client", {
-            userPool: this.userPool,
+        this.labellersClient = this.userPool.addClient("labellers-client", {
             authFlows: {
                 adminUserPassword: true,
                 custom: true,
@@ -221,12 +217,11 @@ export class IdentityConstructs extends cdk.Construct {
             exportName: "labellersPoolClientId",
         });
 
-        new cdk.CfnOutput(this, "UserPoolDomain", {
+       new cdk.CfnOutput(this, "UserPoolDomain", {
             value: this.userPoolDomain.domainName,
             description: "User pool domain",
             exportName: "userPoolDomain",
         });
-
 
         new cdk.CfnOutput(this, "GroundTruthRoleOutput", {
             value: this.groundTruthRole.roleArn,

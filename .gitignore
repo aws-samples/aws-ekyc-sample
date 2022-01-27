@@ -1,1 +1,6 @@
 .DS_Store
+packages/ui/src/config.json
+
+packages/PostDeploymentScripts/src/output.json
+
+packages/ekyc-api/output.json
