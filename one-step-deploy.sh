@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-RED='\033[0;31m'
+RED='\033[1;34m'
 NC='\033[0m'
 #### Build the API project
 printf "${RED}Building the API${NC}\n"
@@ -30,7 +30,7 @@ pushd infra
 yarn
 rm -rf output
 cdk synth --all -o output
-cdk deploy --all --require-approval never  --verbose --debug --outputs-file output.json > debug.json
+cdk deploy --all --require-approval never  
 popd
 #### Copy the CDK output to the right directories
 cp infra/output.json packages/ekyc-api
@@ -48,5 +48,5 @@ pushd infra
 yarn 
 rm -rf output
 cdk synth --all -o output
-cdk deploy --all --require-approval never  --verbose --debug --outputs-file output.json  > debug-2.json
+cdk deploy --all --require-approval never  
 popd
