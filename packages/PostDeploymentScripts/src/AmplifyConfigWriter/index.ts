@@ -1,6 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 import cdkOutput from '../output.json'
+import { S3Client, PutObjectCommand,PutObjectCommandInput } from "@aws-sdk/client-s3";
+
 
 interface IConfig {
     region?: string,
@@ -36,6 +38,7 @@ export default class AmplifyConfigWriter  {
                 configOutput.dataApiEndpoint = value
             else if (key==='DeploymentRegion')
                 configOutput.region = value
+          
         }
 
         const absPath = path.resolve('../ui/src/config.json')
