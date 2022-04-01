@@ -1,0 +1,8 @@
+{
+    "region": "region",
+    "mandatorySignIn": true,
+    "userPoolId": "userPoolId",
+    "userPoolWebClientId": "userPoolWebClientId",
+    "authenticationFlowType": "authenticationFlowType",
+    "dataApiEndpoint": "dataApiEndpoint"
+}
