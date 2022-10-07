@@ -22,17 +22,17 @@ const VerificationRequestHistory = () => {
         fetchHistory()
     }, [])
 
-    interface DataType {
-        sessionId: string;
-        client: string;
-        isSuccessful: boolean
-        documentType: string
-        error: string
-        time: number
-    }
+    // interface DataType {
+    //     sessionId: string;
+    //     client: string;
+    //     isSuccessful: boolean
+    //     documentType: string
+    //     error: string
+    //     time: number
+    // }
 
 
-    const columnDefinitions: Column<DataType>[] = [
+    const columnDefinitions: Column<any>[] = [
         {
             id: 'sessionId',
             width: 200,
@@ -58,7 +58,7 @@ const VerificationRequestHistory = () => {
                         return <StatusIndicator statusType='negative'>Not Successful</StatusIndicator>;
 
                 }
-                return row.id;
+                return null;
             }
         },
         {

@@ -8,7 +8,6 @@ import Stack from "aws-northstar/layouts/Stack";
 import {API} from "aws-amplify";
 import Utils from "../../Utils";
 import Button from "aws-northstar/components/Button";
-import {useHistory} from "react-router-dom";
 import LoadingIndicator from "aws-northstar/components/LoadingIndicator";
 import {v4 as uuid} from 'uuid';
 
@@ -34,7 +33,6 @@ function NewTrainingJob() {
     const [fileCount, setFileCount] = useState<number>(0)
     const [docTypes, setDocTypes] = useState(null)
 
-    const history = useHistory();
 
     const onFileUploadChanged = (event: any) => {
 
@@ -59,7 +57,7 @@ function NewTrainingJob() {
             setDocTypes(response.map((a: DocType) => a.Name).join(', '))
             setIsLoading(false)
         }
-        
+
         fetchDocumentTypes()
     }, [])
 

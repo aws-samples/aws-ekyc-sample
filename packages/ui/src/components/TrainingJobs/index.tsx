@@ -5,7 +5,7 @@ import Utils from "../../Utils";
 import {Container, Stack} from "aws-northstar";
 import Button from "aws-northstar/components/Button";
 import LoadingIndicator from "aws-northstar/components/LoadingIndicator";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 const apiName = 'ekycApi'
 
@@ -17,7 +17,7 @@ const TrainingJobsTable = () => {
 
     const [data, setData] = useState([])
 
-    const history = useHistory();
+    const history = useNavigate();
 
     useEffect(() => {
         const fetchJobs = async () => {
@@ -34,16 +34,16 @@ const TrainingJobsTable = () => {
 
     }, [])
 
-    interface DataType {
-        id: string;
-        startTime: number;
-        status: string
-        projectVersionArn: string
-        labellingJobArn: string
-    }
+    // interface DataType {
+    //     id: string;
+    //     startTime: number;
+    //     status: string
+    //     projectVersionArn: string
+    //     labellingJobArn: string
+    // }
 
 
-    const columnDefinitions: Column<DataType>[] = [
+    const columnDefinitions: Column<any>[] = [
         {
             id: 'id',
             width: 100,
@@ -84,7 +84,7 @@ const TrainingJobsTable = () => {
         <div>
             <Container
                 actionGroup={<Button onClick={() => {
-                    history.push("/newjob");
+                    history("/newjob");
                 }} variant='primary'>New Training Job</Button>}
             >
                 <Stack spacing='s'>

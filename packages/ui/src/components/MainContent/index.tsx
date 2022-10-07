@@ -12,9 +12,9 @@ import EkycSession from "../EkycSession";
 import TrainingJobsTable from "../TrainingJobs"
 import VerificationRequestHistory from "../VerificationRequestHistory";
 import FieldData from '../FieldData';
-import {Switch} from "react-router-dom";
 import {Auth} from "aws-amplify";
 import NewTrainingJob from '../NewTrainingJob'
+import {Routes} from "react-router-dom";
 
 
 function MainContent() {
@@ -140,18 +140,18 @@ function MainContent() {
                 navigation={navigation}
                 helpPanel={helpPanel}>
 
-                <Switch>
-                    <Route path="/" exact={true}>
+                <Routes>
+                    <Route path="/" >
                         {mainContent}
                     </Route>
-                    <Route path="/session" component={EkycSession}/>
-                    <Route path="/history" component={VerificationRequestHistory}/>
-                    <Route path="/training" component={TrainingJobsTable}/>
-                    <Route path="/fields" component={FieldData}/>
-                    <Route path="/newjob" component={NewTrainingJob}/>
+                    <Route path="/session" element={EkycSession}/>
+                    <Route path="/history" element={VerificationRequestHistory}/>
+                    <Route path="/training" element={TrainingJobsTable}/>
+                    <Route path="/fields" element={FieldData}/>
+                    <Route path="/newjob" element={NewTrainingJob}/>
                     <Route path="/logout">{handleLogout}</Route>
 
-                </Switch>
+                </Routes>
             </AppLayout>
         </MemoryRouter>
     )
