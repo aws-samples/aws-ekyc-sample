@@ -100,8 +100,8 @@ After the CDK deployment is complete, there are 2 tasks that are handled by the 
 
 ## Pre-Requisites
 
-- [.NET Core 3.1 LTS](https://dotnet.microsoft.com/download/dotnet/3.1)
-- [Node.js 16.13.0 LTS](https://nodejs.org/en/)
+- [.NET Core 6.0 LTS](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [Node.js 18 LTS](https://nodejs.org/en/)
 - [Yarn](https://classic.yarnpkg.com/en/)
 - [Access to an AWS account](https://aws.amazon.com/account/)
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)

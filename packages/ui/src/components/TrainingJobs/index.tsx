@@ -5,7 +5,8 @@ import Utils from "../../Utils";
 import {Container, Stack} from "aws-northstar";
 import Button from "aws-northstar/components/Button";
 import LoadingIndicator from "aws-northstar/components/LoadingIndicator";
-import {useNavigate} from "react-router-dom";
+import {useHistory} from "react-router";
+
 
 const apiName = 'ekycApi'
 
@@ -17,7 +18,7 @@ const TrainingJobsTable = () => {
 
     const [data, setData] = useState([])
 
-    const history = useNavigate();
+    const history = useHistory();
 
     useEffect(() => {
         const fetchJobs = async () => {

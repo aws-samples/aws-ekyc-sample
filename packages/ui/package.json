@@ -21,7 +21,7 @@
     "react-dropzone": "^11.4.2",
     "react-json-pretty": "^2.2.0",
     "react-json-syntax-highlighter": "^0.1.17",
-    "react-router-dom": "^6.3.0",
+    "react-router-dom": "^5.3.3",
     "react-scripts": "^5.0.0",
     "react-syntax-highlighter": "^15.5.0",
     "react-webcam": "^6.0.0",

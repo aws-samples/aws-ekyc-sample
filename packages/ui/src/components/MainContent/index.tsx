@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
-import {MemoryRouter, Route} from 'react-router';
+import {MemoryRouter, Route, Switch} from 'react-router';
 import AppLayout from 'aws-northstar/layouts/AppLayout';
 import Box from 'aws-northstar/layouts/Box';
 import Header from 'aws-northstar/components/Header';
-import SideNavigation, {SideNavigationItemType} from 'aws-northstar/components/SideNavigation';
+import {SideNavigationItemType} from 'aws-northstar/components/SideNavigation';
 import HelpPanel from 'aws-northstar/components/HelpPanel';
 import Link from 'aws-northstar/components/Link';
 import Text from 'aws-northstar/components/Text';
@@ -14,7 +14,7 @@ import VerificationRequestHistory from "../VerificationRequestHistory";
 import FieldData from '../FieldData';
 import {Auth} from "aws-amplify";
 import NewTrainingJob from '../NewTrainingJob'
-import {Routes} from "react-router-dom";
+import Button from "aws-northstar/components/Button";
 
 
 function MainContent() {
@@ -41,13 +41,20 @@ function MainContent() {
     ];
 
     const navigation = (
-        <SideNavigation
-            header={{
-                href: '/',
-                text: 'eKYC Test Interface',
-            }}
-            items={navigationItems}
-        />
+        <div>
+            {
+                navigationItems.map(ni=>{
+                    return <div key={ni.text}><a href={ni.href}>{ni.text}</a></div>
+                })
+            }
+        {/*<SideNavigation*/}
+        {/*    header={{*/}
+        {/*        href: '/',*/}
+        {/*        text: 'eKYC Test Interface',*/}
+        {/*    }}*/}
+        {/*    items={navigationItems}*/}
+        {/*/>*/}
+        </div>
     );
     const helpPanel = (
         <HelpPanel
@@ -140,18 +147,20 @@ function MainContent() {
                 navigation={navigation}
                 helpPanel={helpPanel}>
 
-                <Routes>
+                <Switch>
                     <Route path="/" >
                         {mainContent}
                     </Route>
-                    <Route path="/session" element={EkycSession}/>
-                    <Route path="/history" element={VerificationRequestHistory}/>
-                    <Route path="/training" element={TrainingJobsTable}/>
-                    <Route path="/fields" element={FieldData}/>
-                    <Route path="/newjob" element={NewTrainingJob}/>
-                    <Route path="/logout">{handleLogout}</Route>
+                    <Route path="/session">{EkycSession}</Route>
+                    <Route path="/history">{VerificationRequestHistory}</Route>
+                    <Route path="/training">{TrainingJobsTable}</Route>
+                    <Route path="/fields" >{FieldData}</Route>
+                    <Route path="/newjob">{NewTrainingJob}</Route>
+                    <Route path="/logout"><>
+                        <Button onClick={handleLogout}>Log Out</Button>
+                    </></Route>
 
-                </Routes>
+                </Switch>
             </AppLayout>
         </MemoryRouter>
     )
