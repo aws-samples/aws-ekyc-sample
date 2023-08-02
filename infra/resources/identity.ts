@@ -1,17 +1,18 @@
-import * as cognito from "@aws-cdk/aws-cognito";
-import {CfnUserPoolGroup, OAuthScope, UserPoolClientIdentityProvider, UserPoolDomain} from "@aws-cdk/aws-cognito";
-import * as cdk from "@aws-cdk/core";
-import * as iam from '@aws-cdk/aws-iam'
-import * as s3 from '@aws-cdk/aws-s3'
+import * as cognito from "aws-cdk-lib/aws-cognito";
+import {CfnUserPoolGroup, OAuthScope, UserPoolClientIdentityProvider} from "aws-cdk-lib/aws-cognito";
+import * as cdk from "aws-cdk-lib/core";
+import * as iam from 'aws-cdk-lib/aws-iam'
+import * as s3 from 'aws-cdk-lib/aws-s3'
 
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import {Construct} from "constructs";
 
 interface IdentityConstructProps {
     cfJsWebApp: cloudfront.CloudFrontWebDistribution
     trainingBucket: s3.Bucket
 }
 
-export class IdentityConstructs extends cdk.Construct {
+export class IdentityConstructs extends Construct {
     public readonly userPool: cognito.UserPool;
 
     public readonly userPoolClient: cognito.UserPoolClient;
@@ -27,7 +28,7 @@ export class IdentityConstructs extends cdk.Construct {
     public readonly groundTruthRole: iam.Role
 
 
-    constructor(scope: cdk.Construct, id: string, props: IdentityConstructProps) {
+    constructor(scope: Construct, id: string, props: IdentityConstructProps) {
         super(scope, id);
 
         // User Pool

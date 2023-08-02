@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import "source-map-support/register";
-import * as cdk from "@aws-cdk/core";
 import {EkycInfraStack} from "../lib/infra-stack";
+import {App} from "aws-cdk-lib";
 
-const app = new cdk.App();
+const app = new App();
 
 
 const ekycStack = new EkycInfraStack(app, "EkycInfraStack", {});

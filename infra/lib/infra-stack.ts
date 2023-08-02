@@ -12,7 +12,7 @@ on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 express or implied. See the License for the specific language governing
 permissions and limitations under the License.
  */
-import * as cdk from "@aws-cdk/core";
+
 import ekycApiConstruct from "../resources/api";
 import StorageConstruct, * as storage from "../resources/storage";
 import {IdentityConstructs} from "../resources/identity";
@@ -21,12 +21,13 @@ import {ParamStoreConstruct} from "../resources/param-store";
 import SnsConstruct from "../resources/sns";
 import WorkteamConstruct from "../resources/workteam";
 import EventConstructs from "../resources/events";
-import { Stack } from "@aws-cdk/core";
+import {CfnOutput, Stack, StackProps} from "aws-cdk-lib";
+import {Construct} from "constructs";
 
-export class EkycInfraStack extends cdk.Stack {
+export class EkycInfraStack extends Stack {
 
 
-    constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props)
 
 
@@ -52,10 +53,10 @@ export class EkycInfraStack extends cdk.Stack {
             labellersGroup: identity.labellersGroup,
             trainingBucket: storage.trainingBucket
         })
-        
-        const param_store = new ParamStoreConstruct(this, "parameters", {})
 
-        const api = new ekycApiConstruct(this, "ekyc-api", {
+        const param_store = new ParamStoreConstruct(this, "parameters")
+
+         new ekycApiConstruct(this, "ekyc-api", {
             trainingTable: storage.trainingTable,
             storageBucket: storage.storageBucket,
             trainingBucket: storage.trainingBucket,
@@ -73,8 +74,8 @@ export class EkycInfraStack extends cdk.Stack {
             useFieldCoordinatesExtractionMethodParameter:param_store.useFieldCoordinatesExtractionMethod
         })
 
-       
-        const events = new EventConstructs(this, 'event-triggers',
+
+       new EventConstructs(this, 'event-triggers',
             {
                 RekognitionCustomLabelsProjectArnParameter:param_store.rekognitionCustomLabelsProjectArn,
                 RekognitionCustomLabelsProjectVersionArnParameter: param_store.rekognitionCustomLabelsProjectVersionArn,
@@ -82,7 +83,7 @@ export class EkycInfraStack extends cdk.Stack {
                 trainingBucket: storage.trainingBucket
             })
 
-        new cdk.CfnOutput(this, "DeploymentRegion", {
+        new CfnOutput(this, "DeploymentRegion", {
                 value: Stack.of(this).region,
                 description: "The region that this stack has been deployed in.",
                 exportName: "deploymentRegion",

@@ -1,19 +1,20 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
- import {
-    AwsCustomResource,
-    AwsCustomResourcePolicy,
-    PhysicalResourceId,
-    PhysicalResourceIdReference,
-  } from '@aws-cdk/custom-resources';
-  import { Construct } from '@aws-cdk/core';
-  import { WAFV2 } from 'aws-sdk';
-  ​
-  export interface CloudFrontWebAclProps {
+
+import {WAFV2} from 'aws-sdk';
+import {
+  AwsCustomResource,
+  AwsCustomResourcePolicy,
+  PhysicalResourceId,
+  PhysicalResourceIdReference
+} from "aws-cdk-lib/custom-resources";
+import {Construct} from "constructs";
+
+export interface CloudFrontWebAclProps {
     readonly name: string;
     readonly managedRules: WAFV2.ManagedRuleGroupStatement[];
   }
-  ​
+
   /**
    * This construct creates a WAFv2 Web ACL for cloudfront in the us-east-1 region (required for cloudfront) no matter the
    * region of the parent cloudformation/cdk stack.
@@ -22,13 +23,13 @@
     public readonly webAclId: string;
     public readonly name: string;
     public readonly region: string = 'us-east-1';
-  ​
+
     constructor(scope: Construct, id: string, props: CloudFrontWebAclProps) {
       super(scope, id);
-  ​
+
       this.name = props.name;
       const Scope = 'CLOUDFRONT';
-  ​
+
       // The parameters for creating the Web ACL
       const createWebACLRequest: WAFV2.Types.CreateWebACLRequest = {
         Name: this.name,
@@ -51,7 +52,7 @@
           },
         })),
       };
-  ​
+
       // Create the Web ACL
       const createCustomResource = new AwsCustomResource(this, `${id}-Create`, {
         policy: AwsCustomResourcePolicy.fromSdkCalls({
@@ -66,13 +67,13 @@
         },
       });
       this.webAclId = createCustomResource.getResponseField('Summary.Id');
-  ​
+
       const getWebACLRequest: WAFV2.Types.GetWebACLRequest = {
         Name: this.name,
         Scope,
         Id: this.webAclId,
       };
-  ​
+
       // A second custom resource is used for managing the deletion of this construct, since both an Id and LockToken
       // are required for Web ACL Deletion
       new AwsCustomResource(this, `${id}-Delete`, {
@@ -99,7 +100,7 @@
         },
       });
     }
-  ​
+
     public getArn = (account: string) =>
       `arn:aws:wafv2:${this.region}:${account}:global/webacl/${this.name}/${this.webAclId}`;
   }

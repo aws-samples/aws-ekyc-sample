@@ -1,21 +1,19 @@
-import * as cdk from "@aws-cdk/core";
-import {Construct} from "@aws-cdk/core";
+import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
+import {CfnWorkteam} from "aws-cdk-lib/aws-sagemaker";
+import * as cognito from "aws-cdk-lib/aws-cognito";
+import {Topic} from "aws-cdk-lib/aws-sns";
+import * as s3Deployment from "aws-cdk-lib/aws-s3-deployment";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import {Construct} from "constructs";
+import {CfnOutput} from "aws-cdk-lib";
 
-import * as sagemaker from "@aws-cdk/aws-sagemaker";
-import {CfnWorkteam} from "@aws-cdk/aws-sagemaker";
-import * as cognito from "@aws-cdk/aws-cognito";
-import {Topic} from "@aws-cdk/aws-sns";
-import * as s3Deployment from "@aws-cdk/aws-s3-deployment";
-import * as s3 from "@aws-cdk/aws-s3";
-
-interface WorkteamConstructProps {
+export interface WorkteamConstructProps {
     readonly cognitoUserPool: cognito.UserPool;
     readonly cognitoAppClient: cognito.UserPoolClient;
     readonly labellersTopic: Topic;
     readonly labellersGroup: cognito.CfnUserPoolGroup;
     readonly trainingBucket: s3.Bucket
 }
-
 
 export default class WorkteamConstruct extends Construct {
 
@@ -46,9 +44,9 @@ export default class WorkteamConstruct extends Construct {
                 workteamName: "DocumentBoundingBoxWorkTeam",
             }
         )
-        
-       
-        new cdk.CfnOutput(this, "GroundTruthWorkTeam", {
+
+
+        new CfnOutput(this, "GroundTruthWorkTeam", {
             value: this.labellersWorkTeam.workteamName!,
             description: "Name of work team for Ground Truth",
             exportName: "groundTruthWorkTeam",

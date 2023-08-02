@@ -1,19 +1,20 @@
-import * as core from "@aws-cdk/core";
-import {Bucket} from "@aws-cdk/aws-s3";
-import * as s3Deployment from "@aws-cdk/aws-s3-deployment";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
+import * as core from "aws-cdk-lib/core";
+import {Bucket} from "aws-cdk-lib/aws-s3";
+import * as s3Deployment from "aws-cdk-lib/aws-s3-deployment";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import CloudFrontWebAcl from './cloudfront-web-acl'
+import {Construct} from "constructs";
 
 interface WebAppConstructProps {
     readonly webBucket: Bucket;
 }
 
-export default class WebAppConstruct extends core.Construct {
+export default class WebAppConstruct extends Construct {
 
     cfWeb: cloudfront.CloudFrontWebDistribution
 
 
-    constructor(scope: core.Construct, id: string, props: WebAppConstructProps) {
+    constructor(scope: Construct, id: string, props: WebAppConstructProps) {
         super(scope, "web-app");
 
         //   this.createWAF(this.node.addr)

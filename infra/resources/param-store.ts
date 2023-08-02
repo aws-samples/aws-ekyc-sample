@@ -1,12 +1,9 @@
-import * as cdk from "@aws-cdk/core";
-import {StringParameter} from "@aws-cdk/aws-ssm";
-
-interface ParamStoreProps extends cdk.StackProps {
-
-}
+import {StringParameter} from "aws-cdk-lib/aws-ssm";
+import {Construct} from "constructs";
+import {CfnOutput} from "aws-cdk-lib";
 
 
-export class ParamStoreConstruct extends cdk.Construct {
+export class ParamStoreConstruct extends Construct {
 
     readonly rekognitionCustomLabelsProjectArn: StringParameter
 
@@ -14,7 +11,7 @@ export class ParamStoreConstruct extends cdk.Construct {
 
     readonly useFieldCoordinatesExtractionMethod : StringParameter
 
-    constructor(scope: cdk.Construct, id: string, props: ParamStoreProps) {
+    constructor(scope: Construct, id: string) {
         super(scope, id);
 
         // This value gets filled after training is complete
@@ -23,7 +20,7 @@ export class ParamStoreConstruct extends cdk.Construct {
 
         })
 
-        new cdk.CfnOutput(this, "rekognition-custom-labels-arn", {
+        new CfnOutput(this, "rekognition-custom-labels-arn", {
             value: this.rekognitionCustomLabelsProjectArn.parameterName,
             description: "Rekognition custom labels project ARN parameter name",
             exportName: "rekognition-custom-labels-arn",
@@ -36,20 +33,20 @@ export class ParamStoreConstruct extends cdk.Construct {
 
         })
 
-        new cdk.CfnOutput(this, "rekognition-custom-labels-project-arn", {
+        new CfnOutput(this, "rekognition-custom-labels-project-arn", {
             value: this.rekognitionCustomLabelsProjectVersionArn.parameterName,
             description: "Rekognition custom labels project version ARN parameter name",
             exportName: "rekognition-custom-labels-version-arn",
         });
 
-       
+
          // This stores whether the field coordinate extraction method is used on documents by default, or else Textract is used
          this.useFieldCoordinatesExtractionMethod = new StringParameter(this, 'ekyc-field-extraction-method', {
             stringValue: 'false',
 
         })
 
-        new cdk.CfnOutput(this, "field-extraction-method", {
+        new CfnOutput(this, "field-extraction-method", {
             value: this.useFieldCoordinatesExtractionMethod.parameterName,
             description: "Use the field coordinates method to extract field data from documents. Otherwise, Textract is used.",
             exportName: "field-extraction-method",

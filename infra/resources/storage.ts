@@ -1,11 +1,12 @@
-import * as core from "@aws-cdk/core";
-import {RemovalPolicy} from "@aws-cdk/core";
-import * as s3 from "@aws-cdk/aws-s3";
-import {BucketEncryption} from "@aws-cdk/aws-s3";
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import {TableEncryption} from "@aws-cdk/aws-dynamodb";
+import * as core from "aws-cdk-lib/core";
+import {RemovalPolicy} from "aws-cdk-lib/core";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import {BucketEncryption} from "aws-cdk-lib/aws-s3";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import {TableEncryption} from "aws-cdk-lib/aws-dynamodb";
+import {Construct} from "constructs";
 
-export default class StorageConstruct extends core.Construct {
+export default class StorageConstruct extends Construct {
     public readonly sessionsTable: dynamodb.Table;
 
     public readonly verificationHistoryTable: dynamodb.Table;
@@ -20,7 +21,7 @@ export default class StorageConstruct extends core.Construct {
 
     public readonly trainingBucket: s3.Bucket;
 
-    constructor(scope: core.Construct, id: string) {
+    constructor(scope: Construct, id: string) {
         super(scope, id);
 
         new s3.Bucket(this, "deployBucket", {

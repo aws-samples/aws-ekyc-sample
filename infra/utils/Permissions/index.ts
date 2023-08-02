@@ -1,5 +1,5 @@
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import  * as iam from "@aws-cdk/aws-iam";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 class Utils {
 
@@ -30,4 +30,4 @@ class Utils {
 
 }
 
-export default Utils 
+export default Utils

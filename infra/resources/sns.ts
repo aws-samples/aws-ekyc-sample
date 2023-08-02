@@ -1,9 +1,8 @@
-import * as sns from '@aws-cdk/aws-sns'
-import * as subscriptions from '@aws-cdk/aws-sns-subscriptions'
-import * as core from "@aws-cdk/core";
-import {Construct} from "@aws-cdk/core";
-import * as iam from '@aws-cdk/aws-iam'
-import {ServicePrincipal} from '@aws-cdk/aws-iam'
+import {Construct} from "constructs";
+import * as iam from "aws-cdk-lib/aws-iam"
+import {ServicePrincipal} from "aws-cdk-lib/aws-iam"
+import * as sns from "aws-cdk-lib/aws-sns"
+import {CfnOutput} from "aws-cdk-lib";
 
 interface SnsProps {
     groundTruthRole: iam.Role
@@ -27,7 +26,7 @@ export default class SnsConstruct extends Construct {
 
         //this.approvalTopic.addSubscription(new subscriptions.EmailSubscription('youremail@domain.com'))
 
-        new core.CfnOutput(this, "approvalTopic", {
+        new CfnOutput(this, "approvalTopic", {
             value: this.approvalTopic.topicArn
         });
 
@@ -37,7 +36,7 @@ export default class SnsConstruct extends Construct {
 
         // this.labellersTopic.addSubscription(new subscriptions.EmailSubscription('youremail@domain.com'))
 
-        new core.CfnOutput(this, "labellingTopic", {
+        new CfnOutput(this, "labellingTopic", {
             value: this.labellersTopic.topicArn
         });
 

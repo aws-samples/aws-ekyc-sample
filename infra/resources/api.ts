@@ -1,18 +1,19 @@
-import {Arn, CfnOutput, Construct, Duration, Stack,} from "@aws-cdk/core";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as apigateway from "@aws-cdk/aws-apigateway";
-import {ApiKeySourceType, AuthorizationType} from "@aws-cdk/aws-apigateway";
-import * as cognito from "@aws-cdk/aws-cognito";
-import * as lambda from "@aws-cdk/aws-lambda";
-import {Tracing} from "@aws-cdk/aws-lambda";
-import * as waf from "@aws-cdk/aws-wafv2";
-import {ManagedPolicy, PolicyStatement, Role, ServicePrincipal,} from "@aws-cdk/aws-iam";
-import {StringParameter} from "@aws-cdk/aws-ssm";
-import {Topic} from "@aws-cdk/aws-sns";
-import {CloudFrontWebDistribution} from "@aws-cdk/aws-cloudfront";
-import * as sagemaker from "@aws-cdk/aws-sagemaker";
 import permissionUtils from "../utils/Permissions";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb"
+import * as cognito from "aws-cdk-lib/aws-cognito"
+import {Topic} from "aws-cdk-lib/aws-sns";
+import * as lambda from "aws-cdk-lib/aws-lambda"
+import {Tracing} from "aws-cdk-lib/aws-lambda"
+import * as sagemaker from "aws-cdk-lib/aws-sagemaker"
+import * as apigateway from "aws-cdk-lib/aws-apigateway"
+import {ApiKeySourceType, AuthorizationType} from "aws-cdk-lib/aws-apigateway"
+import {StringParameter} from "aws-cdk-lib/aws-ssm";
+import {ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
+import {CloudFrontWebDistribution} from "aws-cdk-lib/aws-cloudfront";
+import {CfnWebACL, CfnWebACLAssociation} from "aws-cdk-lib/aws-wafv2";
+import {Construct} from "constructs";
+import {Arn, CfnOutput, Stack} from "aws-cdk-lib";
 
 export interface EKYCApiConstructProps {
     readonly storageBucket: s3.Bucket;
@@ -37,18 +38,17 @@ export default class EKYCApiConstruct extends Construct {
 
     public readonly api: apigateway.LambdaRestApi;
 
-    public webAcl: waf.CfnWebACL;
+    public webAcl: CfnWebACL;
 
     constructor(scope: Construct, id: string, props: EKYCApiConstructProps) {
         super(scope, id);
 
         const backendFn = new lambda.Function(this, "ekyc-proxy-handler", {
-            runtime: lambda.Runtime.DOTNET_CORE_3_1,
+            runtime: lambda.Runtime.DOTNET_6,
             handler: "ekyc-api::ekyc_api.LambdaEntryPoint::FunctionHandlerAsync",
             code: lambda.Code.fromAsset(
                 "../packages/ekyc-api/src/ekyc-api/bin/Debug/netcoreapp3.1"
             ),
-            timeout: Duration.seconds(30),
             memorySize: 1024,
             environment: {
                 StorageBucket: props.storageBucket.bucketName,
@@ -195,6 +195,8 @@ export default class EKYCApiConstruct extends Construct {
                 const methodCfn = method.node.defaultChild as apigateway.CfnMethod;
                 methodCfn.authorizationType = apigateway.AuthorizationType.NONE;
                 methodCfn.authorizerId = undefined;
+                methodCfn.authorizationScopes = undefined;
+                methodCfn.apiKeyRequired = false;
             });
 
         const deployment = new apigateway.Deployment(this, "ekyc-api-deployment", {
@@ -219,7 +221,7 @@ export default class EKYCApiConstruct extends Construct {
             exportName: "DataAPIId",
         });
 
-       
+
         const apiArn = Arn.format(
             {
                 resource: "apis",
@@ -238,7 +240,7 @@ export default class EKYCApiConstruct extends Construct {
     }
 
     private addWAFtoStage(api: apigateway.RestApi, stage: apigateway.Stage) {
-        const aclAssociation = new waf.CfnWebACLAssociation(
+        new CfnWebACLAssociation(
             this,
             `waf-assoc-${stage.node.addr}`,
             {
@@ -251,7 +253,7 @@ export default class EKYCApiConstruct extends Construct {
     }
 
     private createWAF(name: string) {
-        this.webAcl = new waf.CfnWebACL(this, `ProviderWafWebACL-${name}`, {
+        this.webAcl = new CfnWebACL(this, `ProviderWafWebACL-${name}`, {
             name,
             description: `WebACL for ${name}`,
             defaultAction: {

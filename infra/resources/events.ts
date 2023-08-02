@@ -1,13 +1,14 @@
-import * as lambda from "@aws-cdk/aws-lambda";
-import {Construct} from "@aws-cdk/core";
-import * as events from "@aws-cdk/aws-events";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as iam from '@aws-cdk/aws-iam'
-import {StringParameter} from "@aws-cdk/aws-ssm";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as eventtargets from 'aws-cdk-lib/aws-events-targets'
+import * as events from "aws-cdk-lib/aws-events";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as iam from 'aws-cdk-lib/aws-iam'
+import {StringParameter} from "aws-cdk-lib/aws-ssm";
 import permissionUtils from '../utils/Permissions'
+import {Construct} from "constructs";
+
 //import * as eventTargets from '@aws-cdk/aws-events-targets'
-const eventTargets = require("@aws-cdk/aws-events-targets");
 
 interface EventConstructsProps {
     trainingBucket: s3.Bucket;
@@ -26,7 +27,7 @@ export default class EventConstructs extends Construct {
             this,
             "groundtruth-eventchange-handler",
             {
-                runtime: lambda.Runtime.DOTNET_CORE_3_1,
+                runtime: lambda.Runtime.DOTNET_6,
                 handler:
                     "GroundTruthJobHandler::GroundTruthJobHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
@@ -62,7 +63,7 @@ export default class EventConstructs extends Construct {
             this,
             "check-dataset-handler",
             {
-                runtime: lambda.Runtime.DOTNET_CORE_3_1,
+                runtime: lambda.Runtime.DOTNET_6,
                 handler:
                     "CheckDatasetHandler::CheckDatasetHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
@@ -102,7 +103,7 @@ export default class EventConstructs extends Construct {
                     detailType: ["SageMaker Ground Truth Labeling Job State Change"],
                 },
                 targets: [
-                    new eventTargets.LambdaFunction(
+                    new eventtargets.LambdaFunction(
                         triggerRekognitionCustomLabelsTraining,
                         {}
                     ),
@@ -115,7 +116,7 @@ export default class EventConstructs extends Construct {
             "CheckRekognitionDatasetStatus",
             {
                 schedule: events.Schedule.cron({minute: "15"}),
-                targets: [new eventTargets.LambdaFunction(checkDatasetHandler, {})],
+                targets: [new eventtargets.LambdaFunction(checkDatasetHandler, {})],
             }
         );
     }
