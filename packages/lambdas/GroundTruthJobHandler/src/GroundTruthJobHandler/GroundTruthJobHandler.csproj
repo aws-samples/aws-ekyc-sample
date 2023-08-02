@@ -1,19 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
         <AWSProjectType>Lambda</AWSProjectType>
         <!-- This property makes the build directory similar to a publish directory and helps the AWS .NET Lambda Mock Test Tool find project dependencies. -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <LangVersion>10</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Amazon.Lambda.Core" Version="2.1.0"/>
-        <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.2.0"/>
-        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.1"/>
-        <PackageReference Include="AWSSDK.Rekognition" Version="3.7.5.14"/>
-        <PackageReference Include="AWSSDK.S3" Version="3.7.5"/>
-        <PackageReference Include="AWSSDK.SageMaker" Version="3.7.21.10"/>
-        <PackageReference Include="AWSSDK.SageMakerRuntime" Version="3.7.1.51"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
+        <PackageReference Include="Amazon.Lambda.Core" Version="2.1.0" />
+        <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.2.0" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.1" />
+        <PackageReference Include="AWSSDK.Rekognition" Version="3.7.5.14" />
+        <PackageReference Include="AWSSDK.S3" Version="3.7.5" />
+        <PackageReference Include="AWSSDK.SageMaker" Version="3.7.21.10" />
+        <PackageReference Include="AWSSDK.SageMakerRuntime" Version="3.7.1.51" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 </Project>
