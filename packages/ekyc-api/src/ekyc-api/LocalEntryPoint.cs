@@ -13,7 +13,7 @@ namespace ekyc_api
     {
         public static void Main(string[] args)
         {
-            SetEnvVars();
+            //SetEnvVars();
 
             var builder = CreateHostBuilder(args).Build();
 
@@ -67,7 +67,11 @@ namespace ekyc_api
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>()
+                        .UseUrls("http://localhost:5000");
+                })
                 .ConfigureLogging(
                     logging =>
                     {
@@ -76,6 +80,7 @@ namespace ekyc_api
                         // When you need logging below set the minimum level. Otherwise the logging framework will default to Informational for external providers.
                         logging.SetMinimumLevel(LogLevel.Debug);
                     });
+
         }
     }
 }

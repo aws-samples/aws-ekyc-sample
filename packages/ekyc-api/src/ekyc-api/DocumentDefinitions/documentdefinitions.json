@@ -105,6 +105,64 @@
       ]
     },
     {
+      "Name": "THAI_ID_FRONT",
+      "FullName": "Thai ID Card Front",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": [
+        {
+          "Name": "Thai Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.264,
+            "Width": 0.632,
+            "Top": 0.2,
+            "Height": 0.071
+          },
+          "Language":"th"
+        },
+        {
+          "Name": "English First Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.377,
+            "Width": 0.49,
+            "Top": 0.289,
+            "Height": 0.046
+          }
+        }
+      ]
+    },
+    {
+      "Name": "THAI_ID_BACK",
+      "FullName": "Thai ID Card Back",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": [
+        {
+          "Name": "Thai Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.264,
+            "Width": 0.632,
+            "Top": 0.2,
+            "Height": 0.071
+          },
+          "Language":"th"
+        },
+        {
+          "Name": "English First Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.377,
+            "Width": 0.49,
+            "Top": 0.289,
+            "Height": 0.046
+          }
+        }
+      ]
+    },
+    {
       "Name": "PRC_PASSPORT",
       "FullName": "Chinese Passport",
       "SignatureExtractionSupported": false,

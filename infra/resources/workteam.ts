@@ -1,17 +1,17 @@
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import {CfnWorkteam} from "aws-cdk-lib/aws-sagemaker";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import {CfnUserPoolGroup} from "aws-cdk-lib/aws-cognito";
 import {Topic} from "aws-cdk-lib/aws-sns";
 import * as s3Deployment from "aws-cdk-lib/aws-s3-deployment";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import {Construct} from "constructs";
 import {CfnOutput} from "aws-cdk-lib";
+import * as cdk from "aws-cdk-lib/core";
 
 export interface WorkteamConstructProps {
-    readonly cognitoUserPool: cognito.UserPool;
-    readonly cognitoAppClient: cognito.UserPoolClient;
+
     readonly labellersTopic: Topic;
-    readonly labellersGroup: cognito.CfnUserPoolGroup;
     readonly trainingBucket: s3.Bucket
 }
 
@@ -22,7 +22,66 @@ export default class WorkteamConstruct extends Construct {
     constructor(scope: Construct, id: string, props: WorkteamConstructProps) {
         super(scope, id);
 
-        const strGroupName = props.labellersGroup.groupName!;
+        const labellersUserPool = new cognito.UserPool(this, "labellers-userpool", {
+            userPoolName: "labellers-user-pool",
+            selfSignUpEnabled: false,
+            signInAliases: {
+                email: true,
+            },
+            autoVerify: {
+                email: true,
+            },
+            standardAttributes: {
+                givenName: {
+                    required: true,
+                    mutable: true,
+                },
+                familyName: {
+                    required: true,
+                    mutable: true,
+                },
+            },
+            customAttributes: {
+                country: new cognito.StringAttribute({mutable: true}),
+                city: new cognito.StringAttribute({mutable: true}),
+                isAdmin: new cognito.StringAttribute({mutable: true}),
+            },
+            passwordPolicy: {
+                minLength: 6,
+                requireLowercase: true,
+                requireDigits: true,
+                requireUppercase: false,
+                requireSymbols: false,
+            },
+            accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+        });
+
+        //  User Pool Client
+        const labellersUserPoolClient = labellersUserPool.addClient("labellersuserpool-client", {
+            authFlows: {
+                adminUserPassword: true,
+                custom: true,
+                userSrp: true,
+                userPassword: true
+            },
+            generateSecret: true,
+            userPoolClientName: "labelling-client"
+        });
+
+
+        const labellersUserPoolDomain = labellersUserPool.addDomain(`userpool-domain-${this.node.addr}`, {
+            cognitoDomain: {
+                domainPrefix: `${this.node.addr}`
+            }
+        })
+
+        const userPoolGroup = new CfnUserPoolGroup(this, "labelUserGroup", {
+            groupName: "labellers",
+            userPoolId: labellersUserPool.userPoolId
+        })
+
+        const strGroupName = userPoolGroup.groupName!;
 
         this.labellersWorkTeam = new sagemaker.CfnWorkteam(
             this,
@@ -32,9 +91,9 @@ export default class WorkteamConstruct extends Construct {
                 memberDefinitions: [
                     {
                         cognitoMemberDefinition: {
-                            cognitoClientId: props.cognitoAppClient.userPoolClientId,
+                            cognitoClientId: labellersUserPoolClient.userPoolClientId,
                             cognitoUserGroup: strGroupName,
-                            cognitoUserPool: props.cognitoUserPool.userPoolId,
+                            cognitoUserPool: labellersUserPool.userPoolId,
                         },
                     },
                 ],

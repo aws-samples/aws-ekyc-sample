@@ -10,12 +10,13 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway"
 import {ApiKeySourceType, AuthorizationType} from "aws-cdk-lib/aws-apigateway"
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
 import {ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
-import {CloudFrontWebDistribution} from "aws-cdk-lib/aws-cloudfront";
 import {CfnWebACL, CfnWebACLAssociation} from "aws-cdk-lib/aws-wafv2";
 import {Construct} from "constructs";
 import {Arn, CfnOutput, Stack} from "aws-cdk-lib";
+import * as path from "path";
 
 export interface EKYCApiConstructProps {
+
     readonly storageBucket: s3.Bucket;
     readonly trainingBucket: s3.Bucket;
     readonly sessionsTable: dynamodb.Table;
@@ -26,8 +27,7 @@ export interface EKYCApiConstructProps {
     readonly approvalsTopic: Topic;
     readonly RekognitionCustomLabelsProjectVersionArnParameter: StringParameter;
     readonly RekognitionCustomLabelsProjectArnParameter: StringParameter;
-    readonly useFieldCoordinatesExtractionMethodParameter :StringParameter,
-    readonly jsCloudFrontDistribution: CloudFrontWebDistribution;
+    readonly useFieldCoordinatesExtractionMethodParameter: StringParameter,
     readonly trainingTable: dynamodb.Table;
     readonly workTeam: sagemaker.CfnWorkteam
     readonly groundTruthRole: Role
@@ -47,8 +47,9 @@ export default class EKYCApiConstruct extends Construct {
             runtime: lambda.Runtime.DOTNET_6,
             handler: "ekyc-api::ekyc_api.LambdaEntryPoint::FunctionHandlerAsync",
             code: lambda.Code.fromAsset(
-                "../packages/ekyc-api/src/ekyc-api/bin/Debug/netcoreapp3.1"
+                path.join(__dirname, "../../packages/ekyc-api/src/ekyc-api/bin/Debug/net6.0")
             ),
+            //vpc: props.vpc,
             memorySize: 1024,
             environment: {
                 StorageBucket: props.storageBucket.bucketName,
@@ -60,10 +61,9 @@ export default class EKYCApiConstruct extends Construct {
                 CognitoAppClientId: props.cognitoAppClient.userPoolClientId,
                 DataRequestsTable: props.dataRequestsTable.tableName,
                 ApprovalsSnsTopic: props.approvalsTopic.topicArn,
-                RekognitionCustomLabelsProjectVersionArnParameterName:props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
-                RekognitionCustomLabelsProjectArnParameterName:props.RekognitionCustomLabelsProjectArnParameter.parameterName,
+                RekognitionCustomLabelsProjectVersionArnParameterName: props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
+                RekognitionCustomLabelsProjectArnParameterName: props.RekognitionCustomLabelsProjectArnParameter.parameterName,
                 UseFieldCoordinatesExtractionMethodParameterName: props.useFieldCoordinatesExtractionMethodParameter.parameterName,
-                OriginDistributionDomain: props.jsCloudFrontDistribution.distributionDomainName,
                 TrainingBucket: props.trainingBucket.bucketName,
                 TrainingTableName: props.trainingTable.tableName,
                 GroundTruthRoleArn: props.groundTruthRole.roleArn,
@@ -80,15 +80,15 @@ export default class EKYCApiConstruct extends Construct {
         if (lambdaRole) {
 
 
-            permissionUtils.addDynamoDbPermissions(props.sessionsTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.sessionsTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.verificationHistoryTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.verificationHistoryTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.trainingTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.trainingTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable, lambdaRole)
 
             props.storageBucket.grantReadWrite(lambdaRole);
 
@@ -172,7 +172,7 @@ export default class EKYCApiConstruct extends Construct {
                     "X-Amz-Security-Token",
                     "X-Amz-User-Agent",
                 ],
-                statusCode:200
+                statusCode: 200
             },
             apiKeySourceType: ApiKeySourceType.HEADER,
             defaultMethodOptions: {

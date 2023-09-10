@@ -27,6 +27,9 @@ namespace ekyc_api.Utils
 
         public static string TrainingTableName =>
             Environment.GetEnvironmentVariable("TrainingTableName");
+        
+        public static string OcrServiceEndpoint => 
+            Environment.GetEnvironmentVariable("OcrServiceEndpoint");
 
         public static string GroundTruthUiTemplateS3Uri =>
             Environment.GetEnvironmentVariable("GroundTruthUiTemplateS3Uri");

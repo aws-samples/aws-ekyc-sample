@@ -35,28 +35,23 @@ export class EkycInfraStack extends Stack {
 
         const storage = new StorageConstruct(this, "storage");
 
-        const jsWebApp = new WebAppConstruct(this, "js-web-app", {
-            webBucket: storage.webBucket
-        })
+        //  const network = new NetworkConstruct(this, `network`)
 
         const identity = new IdentityConstructs(this, "identity", {
-            cfJsWebApp: jsWebApp.cfWeb,
             trainingBucket: storage.trainingBucket
         })
+
 
         const topics = new SnsConstruct(this, 'topics', {groundTruthRole: identity.groundTruthRole})
 
         const workteams = new WorkteamConstruct(this, "workteams", {
-            cognitoUserPool: identity.userPool,
-            cognitoAppClient: identity.labellersClient,
             labellersTopic: topics.labellersTopic,
-            labellersGroup: identity.labellersGroup,
             trainingBucket: storage.trainingBucket
         })
 
         const param_store = new ParamStoreConstruct(this, "parameters")
 
-         new ekycApiConstruct(this, "ekyc-api", {
+        const api = new ekycApiConstruct(this, "ekyc-api", {
             trainingTable: storage.trainingTable,
             storageBucket: storage.storageBucket,
             trainingBucket: storage.trainingBucket,
@@ -66,27 +61,50 @@ export class EkycInfraStack extends Stack {
             cognitoAppClient: identity.userPoolClient,
             dataRequestsTable: storage.dataRequestsTable,
             approvalsTopic: topics.approvalTopic,
-            RekognitionCustomLabelsProjectArnParameter:param_store.rekognitionCustomLabelsProjectArn,
+            RekognitionCustomLabelsProjectArnParameter: param_store.rekognitionCustomLabelsProjectArn,
             RekognitionCustomLabelsProjectVersionArnParameter: param_store.rekognitionCustomLabelsProjectVersionArn,
-            jsCloudFrontDistribution: jsWebApp.cfWeb,
             workTeam: workteams.labellersWorkTeam,
             groundTruthRole: identity.groundTruthRole,
-            useFieldCoordinatesExtractionMethodParameter:param_store.useFieldCoordinatesExtractionMethod
+            useFieldCoordinatesExtractionMethodParameter: param_store.useFieldCoordinatesExtractionMethod
         })
 
+        new WebAppConstruct(this, "js-web-app", {
+            webBucket: storage.webBucket,
+            userPool: identity.userPool,
+            userPoolClient: identity.userPoolClient,
+            api: api.api,
+            configuration: {
+                outputS3Key: "runtime-config.json",
+                windowProperty: "runtimeConfig",
+                config: {
+                    region: this.region,
+                    apiStage: api.api.url,
+                    cognitoUserPoolId: identity.userPool.userPoolId,
+                    cognitoAppClientId: identity.userPoolClient.userPoolClientId,
+                    cognitoDomain: identity.userPoolDomain.domainName,
+                    identityPoolId: identity.identityPool.ref,
+                },
+            }
+        })
 
-       new EventConstructs(this, 'event-triggers',
+        // new OcrServiceConstruct(this, 'ocr-service', {
+        //     vpc: network.vpc,
+        //     ecsRole: identity.ecsRole
+        // })
+
+
+        new EventConstructs(this, 'event-triggers',
             {
-                RekognitionCustomLabelsProjectArnParameter:param_store.rekognitionCustomLabelsProjectArn,
+                RekognitionCustomLabelsProjectArnParameter: param_store.rekognitionCustomLabelsProjectArn,
                 RekognitionCustomLabelsProjectVersionArnParameter: param_store.rekognitionCustomLabelsProjectVersionArn,
                 trainingTable: storage.trainingTable,
                 trainingBucket: storage.trainingBucket
             })
 
         new CfnOutput(this, "DeploymentRegion", {
-                value: Stack.of(this).region,
-                description: "The region that this stack has been deployed in.",
-                exportName: "deploymentRegion",
+            value: Stack.of(this).region,
+            description: "The region that this stack has been deployed in.",
+            exportName: "deploymentRegion",
         });
     }
 }

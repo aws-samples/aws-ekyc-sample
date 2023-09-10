@@ -88,34 +88,6 @@ namespace ekyc_api.Utils
             if (documentDefinition == null)
                 throw new Exception($"Document type {documentType} is not supported.");
 
-            /*  DocumentDefinitionBase documentDefinition;
-  
-              switch (documentType)
-              {
-                  case DocumentTypes.ID_KTP:
-                      documentDefinition =
-                          (DocumentDefinitionBase)_serviceProvider.GetService(typeof(ID_KTP_DocumentDefinition));
-                      break;
-                  case DocumentTypes.MY_NRIC:
-                      documentDefinition =
-                          (DocumentDefinitionBase)_serviceProvider.GetService(typeof(MY_NRIC_DocumentDefinition));
-                      break;
-                  case DocumentTypes.AU_PASSPORT:
-                      documentDefinition =
-                          (DocumentDefinitionBase)_serviceProvider.GetService(typeof(AU_Passport_DocumentDefinition));
-                      break;
-                  case DocumentTypes.KH_IC:
-                      documentDefinition =
-                          (DocumentDefinitionBase)_serviceProvider.GetService(typeof(KH_IC_DocumentDefinition));
-                      break;
-                  case DocumentTypes.PRC_PASSPORT:
-                      documentDefinition =
-                          (DocumentDefinitionBase)_serviceProvider.GetService(typeof(PRC_Passport_DocumentDefinition));
-                      break;
-                  default:
-                      throw new Exception($"Document type {documentType} is not supported.");
-              }
-  */
             var documentTypeDTO = definitions.DocumentTypes
                 .FirstOrDefault(a =>
                     string.Equals(a.Name, documentType.ToString(), StringComparison.CurrentCultureIgnoreCase));

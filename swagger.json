@@ -1,0 +1,986 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "eKYC API",
+    "description": "An API for eKYC prototyping",
+    "termsOfService": "https://aws.amazon.com/asl/",
+    "contact": {
+      "name": "Amazon Web Services",
+      "url": "https://aws.amazon.com",
+      "email": "opensource-codeofconduct@amazon.com"
+    },
+    "license": {
+      "name": "Use under Amazon Software License",
+      "url": "https://aws.amazon.com/asl/"
+    },
+    "version": "v2"
+  },
+  "paths": {
+    "/api/data/request/create": {
+      "post": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Creates a new data request for getting faces and field data.\r\nThis should be called first before trying to get faces or data from documents.",
+        "description": "Returns the ID of the request to be used",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDataRequestResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDataRequestResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDataRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/face": {
+      "post": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Gets the faces in a document.",
+        "description": "Returns the image of the person's face in Base64 format.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3DataRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3DataRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3DataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFacesResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFacesResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFacesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/fields": {
+      "post": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Gets the field values from a document.",
+        "requestBody": {
+          "description": "The field values detected on the document in a JSON object.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3DataRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3DataRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3DataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/url": {
+      "get": {
+        "tags": [
+          "Data"
+        ],
+        "summary": "Returns a presigned URL used for HTTP PUT requests to store assets for data requests.",
+        "parameters": [
+          {
+            "name": "requestId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3Key",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/document/doctypes": {
+      "get": {
+        "tags": [
+          "Document"
+        ],
+        "summary": "Gets the document types that are currently supported.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": { }
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": { }
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": { }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/document/type": {
+      "post": {
+        "tags": [
+          "Document"
+        ],
+        "summary": "Tries to detect the type of document from an image.",
+        "parameters": [
+          {
+            "name": "s3Key",
+            "in": "query",
+            "description": "The key of the object stored in S3. This should be an image.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/document/set": {
+      "post": {
+        "tags": [
+          "Document"
+        ],
+        "summary": "Detects the document type and sets the session document type.",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "The ID of the session that this document belongs to.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3Key",
+            "in": "query",
+            "description": "The key of the document that is stored in S3. This should be an image.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/liveness/verify": {
+      "get": {
+        "tags": [
+          "Liveness"
+        ],
+        "summary": "Verify the liveness of a person for a document. All the images including document, selfie, nose pointing and eyes\r\nclosed should already have been submitted before calling this.",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "The ID of the session to be processed.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyLivenessResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyLivenessResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyLivenessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/new": {
+      "post": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Starts a new session for liveness checking.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewSessionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewSessionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/url": {
+      "get": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Gets a presigned URL to allow uploads using the HTTP PUT verb.",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "The session ID that is being used across multiple requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3Key",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/compare": {
+      "post": {
+        "tags": [
+          "Session"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareDocumentWithSelfie"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareDocumentWithSelfie"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareDocumentWithSelfie"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/selfie": {
+      "post": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Submit a selfie image for liveness checking.",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "The session ID that is being used across multiple requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3Key",
+            "in": "query",
+            "description": "The key of the selfie stored in S3. Must be a valid image of a person with eyes open.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/session/document": {
+      "post": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Submits a document for liveness verification.",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "The session ID that is being used across multiple requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3Key",
+            "in": "query",
+            "description": "The s3 key where the document has been uploaded.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expectedDocumentType",
+            "in": "query",
+            "description": "The type of document that has been uploaded.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/session/nosepoint": {
+      "post": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Submits a nose pointing image for liveness verification.",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "The session ID that is being used across multiple requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3Key",
+            "in": "query",
+            "description": "The key of the image stored in S3.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/session/eyesclosed": {
+      "post": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Submits the eyes closed image for liveness verification.",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "The session ID that is being used across multiple requests.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3Key",
+            "in": "query",
+            "description": "The key of the image stored in S3.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/training/create": {
+      "post": {
+        "tags": [
+          "Training"
+        ],
+        "summary": "Creates a new training job. Use the training job ID to access other methods for training.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingJob"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingJob"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/training/list": {
+      "get": {
+        "tags": [
+          "Training"
+        ],
+        "summary": "Returns a list of training jobs.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingJob"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingJob"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrainingJob"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/training/url": {
+      "get": {
+        "tags": [
+          "Training"
+        ],
+        "summary": "Returns a presigned URL to upload files for training.",
+        "parameters": [
+          {
+            "name": "JobId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "S3Key",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/training/start": {
+      "post": {
+        "tags": [
+          "Training"
+        ],
+        "summary": "Creates a new labelling job based on the images in the S3 bucket.",
+        "parameters": [
+          {
+            "name": "JobId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/history": {
+      "get": {
+        "tags": [
+          "VerificationHistory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryItems"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryItems"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryItems"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CompareDocumentWithSelfie": {
+        "type": "object",
+        "properties": {
+          "isSimilar": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "similarity": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateDataRequestResponse": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetFacesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HistoryItems": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sessionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSuccessful": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "client": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NewSessionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the session to use across multiple liveness check calls.",
+            "nullable": true
+          },
+          "noseBoundsTop": {
+            "type": "number",
+            "description": "The top of the nose-pointing rectangle in percent compared to the document's height.",
+            "format": "double"
+          },
+          "noseBoundsLeft": {
+            "type": "number",
+            "description": "The left of the nose-pointing rectangle in percent compared to the document's width.",
+            "format": "double"
+          },
+          "noseBoundsWidth": {
+            "type": "number",
+            "description": "The width of the nose-pointing rectangle in percent compared to the document's width.",
+            "format": "double"
+          },
+          "noseBoundsHeight": {
+            "type": "number",
+            "description": "The height of the nose-pointing rectangle in percent compared to the document's height.",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "S3DataRequest": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "description": "The ID of the request to use. To get the request ID, first call /data/request/create.",
+            "nullable": true
+          },
+          "s3Key": {
+            "type": "string",
+            "description": "The key of the object in S3 that has been uploaded.",
+            "nullable": true
+          },
+          "documentType": {
+            "type": "string",
+            "description": "The document type. To make the current supported types, call /document/doctypes",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TrainingJob": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "detailedStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "labellingJobArn": {
+            "type": "string",
+            "nullable": true
+          },
+          "datasetCreated": {
+            "type": "boolean"
+          },
+          "datasetArn": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectVersionArn": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectArn": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VerifyLivenessResponse": {
+        "type": "object",
+        "properties": {
+          "isLive": {
+            "type": "boolean",
+            "description": "If true, the document is verified as live."
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if liveness is false.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The response of a liveness verification request."
+      }
+    }
+  }
+}

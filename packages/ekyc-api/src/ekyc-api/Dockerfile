@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/dotnet:core3.1
+FROM public.ecr.aws/lambda/dotnet:6
 
 RUN yum update -y
 
@@ -18,6 +18,6 @@ RUN pip3 --no-cache-dir install --upgrade awscli
 
 WORKDIR /var/task
 
-COPY "bin/Debug/netcoreapp3.1/*" ${LAMBDA_TASK_ROOT}
+COPY "bin/Debug/netcoreapp6.0/*" ${LAMBDA_TASK_ROOT}
 
 CMD [ "ekyc-api::ekyc_api.LambdaEntryPoint::FunctionHandlerAsync" ]

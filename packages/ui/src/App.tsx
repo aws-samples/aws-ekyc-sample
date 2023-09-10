@@ -25,8 +25,8 @@ document.title = 'eKYC demo'
 Amplify.configure({
     // OPTIONAL - if your API requires authentication
     Auth: {
-        region:config.region,
-        mandatorySignIn:true,
+        region: config.region,
+        mandatorySignIn: true,
         userPoolId: config.userPoolId,
         userPoolWebClientId: config.userPoolWebClientId,
         authenticationFlowType: config.authenticationFlowType,

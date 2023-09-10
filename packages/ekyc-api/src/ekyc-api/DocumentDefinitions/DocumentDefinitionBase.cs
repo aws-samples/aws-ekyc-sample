@@ -100,7 +100,7 @@ namespace ekyc_api.DocumentDefinitions
             return returnVal;
         }
 
-        public virtual async Task<Dictionary<string, string>> GetFieldDataByCoordinates(string S3Key,
+        public  async Task<Dictionary<string, string>> GetFieldDataByCoordinates(string S3Key,
             DocumentTypes docType)
         {
             AWSXRayRecorder.Instance.BeginSubsegment("DocumentDefinition::GetFieldDataByCoordinates");

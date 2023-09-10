@@ -1,0 +1,13 @@
+certifi
+Click
+Flask>=2.3.3
+gunicorn
+itsdangerous
+Jinja2
+MarkupSafe
+numpy
+opencv-python>=4.0
+pillow<10.0.0
+pytesseract>=0.3.10
+werkzeug
+thai-personal-card-extract

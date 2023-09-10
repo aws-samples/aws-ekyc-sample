@@ -123,8 +123,7 @@ namespace ekyc_api.Controllers
 
             if (string.IsNullOrEmpty(s3Key))
                 throw new ArgumentException("S3 key cannot be blank.");
-
-
+            
             var sessionValid = await _sessionManager.SessionExistsAndIsValid(sessionId);
 
             if (!sessionValid) throw new ArgumentException($"Session ID {sessionId} does not exist or has expired.");

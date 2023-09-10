@@ -424,7 +424,7 @@ namespace ekyc_api.Controllers
             if (img == null)
                 throw new HttpStatusException(HttpStatusCode.InternalServerError, "Image is not valid.");
 
-            await _livenessChecker.VerifyImageSize(img);
+            await _livenessChecker.VerifyEyesOpen(s3Key);
 
             item.eyesClosedImageKey = s3Key;
 

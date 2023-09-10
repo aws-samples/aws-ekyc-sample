@@ -55,7 +55,9 @@ namespace ekyc_api.DataDefinitions
         AU_PASSPORT,
         KH_IC,
         PRC_PASSPORT,
-        SG_PASSPORT
+        SG_PASSPORT,
+        THAI_ID_FRONT,
+        THAI_ID_BACK
     }
 
     public class GetFacesResponse
@@ -66,6 +68,8 @@ namespace ekyc_api.DataDefinitions
     public class NamedBoundingBox
     {
         public string Name { get; set; }
+        
+        public string Language { get; set; }
 
         public BoundingBox ExpectedBoundingBox { get; set; }
 

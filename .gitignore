@@ -4,3 +4,4 @@
 packages/PostDeploymentScripts/src/output.json
 
 packages/ekyc-api/output.json
+/testdata/**
