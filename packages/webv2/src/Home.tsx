@@ -14,29 +14,31 @@
  limitations under the License.
  ******************************************************************************************************************** */
 
-import { Container, Header, SpaceBetween } from '@cloudscape-design/components';
-import { useContext, useEffect } from 'react';
-import { AppLayoutContext } from './App';
+import {Container, Header, SpaceBetween} from '@cloudscape-design/components';
+import {useContext, useEffect} from 'react';
+import {AppLayoutContext} from './App';
 
 /**
  * Component to render the home "/" route.
  */
 const Home: React.FC = () => {
-  const { setAppLayoutProps } = useContext(AppLayoutContext);
+    const {appLayoutProps, setAppLayoutProps} = useContext(AppLayoutContext);
 
-  useEffect(() => {
-    setAppLayoutProps({
-      contentHeader: <Header>Storage Optimiser</Header>,
-    });
-  }, [setAppLayoutProps]);
+    useEffect(() => {
+        setAppLayoutProps({
+            ...appLayoutProps,
+            contentHeader: <Header>AWS eKYC</Header>,
+            contentType: "default",
+        });
+    }, [setAppLayoutProps]);
 
-  return (
-    <SpaceBetween size="l">
-      <Container>
-       The AWS Storage Optimiser solution helps you view your volumes and reclaim space on them.
-      </Container>
-    </SpaceBetween>
-  );
+    return (
+        <SpaceBetween size="l">
+            <Container>
+                The AWS eKYC solution helps you extract and verify documents and user liveness.
+            </Container>
+        </SpaceBetween>
+    );
 };
 
 export default Home;

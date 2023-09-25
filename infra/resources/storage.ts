@@ -1,7 +1,7 @@
 import * as core from "aws-cdk-lib/core";
 import {RemovalPolicy} from "aws-cdk-lib/core";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import {BucketEncryption} from "aws-cdk-lib/aws-s3";
+import {BlockPublicAccess, Bucket, BucketEncryption, ObjectOwnership} from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import {TableEncryption} from "aws-cdk-lib/aws-dynamodb";
 import {Construct} from "constructs";
@@ -18,8 +18,8 @@ export default class StorageConstruct extends Construct {
     public readonly webBucket: s3.Bucket;
 
     public readonly storageBucket: s3.Bucket;
-
     public readonly trainingBucket: s3.Bucket;
+    public readonly LogsBucket: Bucket
 
     constructor(scope: Construct, id: string) {
         super(scope, id);
@@ -32,8 +32,21 @@ export default class StorageConstruct extends Construct {
 
         });
 
+        this.LogsBucket = new Bucket(this, `${id}-logs-bucket`, {
+            encryption: BucketEncryption.S3_MANAGED,
+            enforceSSL: true,
+            objectOwnership: ObjectOwnership.OBJECT_WRITER,
+            publicReadAccess: false,
+            blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+            versioned: false,
+            removalPolicy: RemovalPolicy.DESTROY
+        });
+
         this.storageBucket = new s3.Bucket(this, "storageBucket", {
             versioned: false,
+            serverAccessLogsBucket: this.LogsBucket,
+            serverAccessLogsPrefix: 'storage-bucket-logs',
+            objectOwnership: ObjectOwnership.OBJECT_WRITER,
             removalPolicy: core.RemovalPolicy.DESTROY,
             encryption: BucketEncryption.S3_MANAGED,
             enforceSSL: true,
@@ -60,6 +73,8 @@ export default class StorageConstruct extends Construct {
         this.trainingBucket = new s3.Bucket(this, "trainingBucket", {
             versioned: false,
             enforceSSL: true,
+            serverAccessLogsBucket: this.LogsBucket,
+            serverAccessLogsPrefix: "training-bucket-logs",
             removalPolicy: core.RemovalPolicy.DESTROY,
             encryption: BucketEncryption.S3_MANAGED,
             autoDeleteObjects: true,
@@ -99,7 +114,7 @@ export default class StorageConstruct extends Construct {
                     allowedHeaders: ["*"],
                 },
             ],
-            enforceSSL:true
+            enforceSSL: true
         });
 
         new core.CfnOutput(this, "WebBucket", {value: this.webBucket.bucketName});

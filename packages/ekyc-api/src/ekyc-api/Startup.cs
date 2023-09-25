@@ -23,40 +23,15 @@ public class Startup
         Configuration = configuration;
 
         AWSXRayRecorder.InitializeInstance(configuration);
+        AWSSDKHandler.RegisterXRayForAllServices();
     }
 
     public static IConfiguration Configuration { get; private set; }
 
-    public static string[] AllowedOrigins
-    {
-        get
-        {
-            return new[]
-            {
-                "*",
-                "http://localhost:3000",
-                $"https://{Environment.GetEnvironmentVariable("OriginDistributionDomain")}"
-            };
-        }
-    }
 
     // This method gets called by the runtime. Use this method to add services to the container
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddCors(options =>
-        {
-            options.AddPolicy(Globals.CorsPolicyName,
-                builder =>
-                {
-                    builder.WithOrigins(AllowedOrigins)
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .DisallowCredentials();
-                });
-        });
-
-        services.AddCors();
-
         //   services.AddSingleton<IAmazonCognitoIdentityProvider>(cognitoIdentityProvider);
         //   services.AddSingleton<CognitoUserPool>(cognitoUserPool);
 
@@ -74,6 +49,12 @@ public class Startup
         services.ConfigServices();
 
         services.AddLogging();
+
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                policy => { policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin(); });
+        });
 
 
         services.AddSwaggerGen(c =>
@@ -156,29 +137,6 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        ServiceActivator.Configure(app.ApplicationServices);
-
-        // Make sure you call this before calling app.UseMvc()
-        app.UseCors(Globals.CorsPolicyName); // allow credentials
-
-        app.UseXRay("eKYCAPI");
-
-        app.UseSwagger();
-
-
-        app.Use((context, next) =>
-        {
-            context.Response.Headers["Access-Control-Allow-Origin"] = string.Join(",", AllowedOrigins);
-            context.Response.Headers["Access-Control-Allow-Headers"] =
-                "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent";
-            context.Response.Headers["Access-Control-Allow-Methods"] = "OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD";
-            context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
-            return next.Invoke();
-        });
-
-
-        if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
-
         app.UseExceptionHandler(c => c.Run(async context =>
         {
             var exception = context.Features
@@ -190,12 +148,29 @@ public class Startup
             await context.Response.WriteAsync(result);
         }));
 
-        app.UseHttpsRedirection();
+        app.UseXRay("eKYCAPI");
+
+        ServiceActivator.Configure(app.ApplicationServices);
+
+        // Make sure you call this before calling app.UseMvc()
+        //app.UseCors(Globals.CorsPolicyName); // allow credentials
+
+        app.UseSwagger();
+
+
+        if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+
+        //app.UseHttpsRedirection();
 
 
         // If not already enabled, you will need to enable ASP.NET Core authentication
-        app.UseAuthentication();
         app.UseRouting();
+
+        app.UseCors(
+            options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+        );
+
+        app.UseAuthentication();
 
         app.UseAuthorization();
 

@@ -11,3 +11,4 @@ pillow<10.0.0
 pytesseract>=0.3.10
 werkzeug
 thai-personal-card-extract
+boto3

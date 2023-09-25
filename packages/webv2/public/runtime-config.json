@@ -1,8 +1,8 @@
 {
   "region": "ap-southeast-1",
-  "apiStage": "https://xh6cs2v283.execute-api.ap-southeast-1.amazonaws.com/uat/",
-  "cognitoUserPoolId": "ap-southeast-1_naOb7g8Xn",
-  "cognitoAppClientId": "3pe3kgqvo8mrpahvr7rqh9el61",
+  "apiStage": "http://localhost:6500",
+  "userPoolId": "ap-southeast-1_naOb7g8Xn",
+  "userPoolWebClientId": "3pe3kgqvo8mrpahvr7rqh9el61",
   "cognitoDomain": "c8912d170300b9c3699d0a292d2ba006c846bda7f9",
   "identityPoolId": "ap-southeast-1:17517799-e039-4a80-925f-f9a769ba72f2"
 }

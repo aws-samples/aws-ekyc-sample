@@ -58,9 +58,12 @@ const NavHeader: React.FC = () => {
 
     // Load the attributes from Cognito
     useEffect(() => {
-
-        setUiAttributesFromCognito().then()
-
+        try {
+            void setUiAttributesFromCognito()
+        } catch (e: any) {
+            // console.error('Error in getting current user info.')
+            console.log(e)
+        }
     }, [])
 
     const utilities: TopNavigationProps.Utility[] = [{
@@ -131,9 +134,16 @@ const NavHeader: React.FC = () => {
         },
     }];
 
+    const getDisplayUserText = (user: any) => {
+        if (runtimeContext?.user?.attributes?.family_name && runtimeContext?.user?.attributes?.given_name)
+            return `${runtimeContext?.user?.attributes?.given_name} ${runtimeContext?.user?.attributes?.family_name}`
+        else
+            return runtimeContext?.user?.username
+    }
+
     runtimeContext.user && utilities.push({
         type: 'menu-dropdown',
-        text: runtimeContext?.user?.username,
+        text: runtimeContext?.user ? getDisplayUserText(runtimeContext?.user) : "",
         description: runtimeContext?.user?.attributes?.email,
         iconName: 'user-profile',
         items: [

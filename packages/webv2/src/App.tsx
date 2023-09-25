@@ -28,6 +28,12 @@ import Auth from "./Auth";
 import Home from "./Home";
 import NavHeader from "./NavHeader";
 import {QueryClient, QueryClientProvider} from "react-query";
+import FieldData from "./components/FieldData";
+import {VerificationList} from "./components/VerificationList";
+import {VerificationWizard} from "./components/VerificationWizard";
+import {SettingsPage} from "./components/Settings";
+import {TrainingList} from "./components/TrainingList";
+import {StartTraining} from "./components/StartTraining";
 
 /**
  /**
@@ -35,9 +41,14 @@ import {QueryClient, QueryClientProvider} from "react-query";
  */
 const NAVIGATION_ITEMS: SideNavigationProps.Item[] = [
     {text: "Home", type: "link", href: "/"},
-    {text: "Instances", type: "link", href: "/instances"},
-    {text: "Volumes", type: "link", href: "/volumes"},
-    {text: "Processes", type: "link", href: "/processes"}
+    {text: "Verification", type: "link", href: "/verify"},
+    {type: 'divider'},
+    {text: "Field Data", type: "link", href: "/fields"},
+    {type: 'divider'},
+    {text: "Training Jobs", type: "link", href: "/training"},
+    {text: "New Training Job", type: "link", href: "/newtraining"},
+    {type: 'divider'},
+    {text: "Settings", type: "link", href: "/settings"},
 ];
 
 const queryClient = new QueryClient();
@@ -108,7 +119,12 @@ const App: React.FC = () => {
                             <Routes>
                                 { /* Define all your routes here */}
                                 <Route path="/" element={<Home/>}/>
-
+                                <Route path="/verify" element={<VerificationList/>}/>
+                                <Route path="/fields" element={<FieldData/>}/>
+                                <Route path="/training" element={<TrainingList/>}/>
+                                <Route path="/newtraining" element={<StartTraining/>}/>
+                                <Route path="/newverification" element={<VerificationWizard/>}/>
+                                <Route path="/settings" element={<SettingsPage/>}/>
                             </Routes>
                         </AppLayoutContext.Provider>
                     }

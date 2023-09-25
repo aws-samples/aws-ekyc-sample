@@ -1,4 +1,3 @@
-import json
 import os
 
 import cv2
@@ -7,7 +6,7 @@ from flask import jsonify, Flask, render_template, request
 from pytesseract import pytesseract
 from werkzeug.utils import secure_filename
 
-from thai_id import extract_thai_id_info
+from thai_id import extract_thai_id_front_info, extract_thai_id_back_info, card_to_dict
 from util import is_running_in_lambda
 
 os.environ["TESSDATA_PREFIX"] = os.path.abspath("./static/tessdata")
@@ -61,7 +60,6 @@ def detect_thai_text():
     text = text.replace(" ", "")
     text = text.replace("\n", "")
     print(f"Text output: {text}")
-    data = pytesseract.image_to_data(Image.open(ofilename))
 
     # remove the processed image - keep for debugging
     os.remove(ofilename)
@@ -69,8 +67,8 @@ def detect_thai_text():
     return {"result": text}
 
 
-@app.route('/thai/id', methods=['GET', 'POST'])
-def detect_thai_id():
+@app.route('/thai/id/front', methods=['GET', 'POST'])
+def detect_thai_id_front():
     if request.method == 'POST':
         f = request.files['file']
         lang = request.args.get("lang")
@@ -87,29 +85,41 @@ def detect_thai_id():
 
         # load the example image and convert it to grayscale
         image = cv2.imread(filepath)
-        # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        #
-        # # apply thresholding to preprocess the image
-        # gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-        #
-        # # apply median blurring to remove any blurring
-        # gray = cv2.medianBlur(gray, 3)
-        #
-        # # save the processed image in the /static/uploads directory
+
         ofilename = os.path.join(app.config['UPLOAD_FOLDER'], "{}.png".format(os.getpid()))
         cv2.imwrite(ofilename, image)
 
-        response = extract_thai_id_info(ofilename)
+        response = extract_thai_id_front_info(ofilename)
+
+        return jsonify(card_to_dict(response))
+
+
+@app.route('/thai/id/back', methods=['POST'])
+def detect_thai_id_back():
+    if request.method == 'POST':
+        f = request.files['file']
+        lang = request.args.get("lang")
+
+        if lang is None:
+            lang = "th"
+
+        # create a secure filename
+        filename = secure_filename(f.filename)
+
+        # save file to /static/uploads
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        f.save(filepath)
+
+        # load the example image and convert it to grayscale
+        image = cv2.imread(filepath)
+
+        ofilename = os.path.join(app.config['UPLOAD_FOLDER'], "{}.png".format(os.getpid()))
+        cv2.imwrite(ofilename, image)
+
+        response = extract_thai_id_back_info(ofilename)
         print(response)
-        # perform OCR on the processed image
-        # text = pytesseract.image_to_string(Image.open(ofilename), lang=lang, timeout=10)
-        # data = pytesseract.image_to_data(Image.open(ofilename))
 
-        # remove the processed image - keep for debugging
-        # os.remove(ofilename)
-
-        # return render_template("uploaded.html", displaytext=text, fname=filename)
-        return json.dumps(response)
+        return jsonify(card_to_dict(response))
 
 
 if __name__ == '__main__':

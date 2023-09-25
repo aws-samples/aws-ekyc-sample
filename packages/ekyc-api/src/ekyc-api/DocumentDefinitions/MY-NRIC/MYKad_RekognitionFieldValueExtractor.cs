@@ -42,7 +42,8 @@ namespace ekyc_api.DocumentDefinitions
             _logger = logger;
         }
 
-        public async Task<Dictionary<string, string>> GetFieldValues(string s3Key)
+        public async Task<Dictionary<string, string>> GetFieldValues(string s3Key,string RekognitionCustomLabelsProjectArn,
+            DocumentTypes documentType)
         {
             if (!File.Exists("states.json"))
                 throw new Exception("Malaysian states file not defined.");

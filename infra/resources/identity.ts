@@ -10,6 +10,7 @@ import {CfnWorkteam} from "aws-cdk-lib/aws-sagemaker";
 
 interface IdentityConstructProps {
     trainingBucket: s3.Bucket
+    storageBucket: s3.Bucket
 }
 
 export class IdentityConstructs extends Construct {
@@ -22,7 +23,7 @@ export class IdentityConstructs extends Construct {
     public readonly identityPool: CfnIdentityPool;
     public readonly labellersGroup: cognito.CfnUserPoolGroup
 
-
+    public readonly rekognitionRole: iam.Role
     public readonly groundTruthRole: iam.Role
 
     public readonly ecsRole: iam.Role
@@ -77,6 +78,17 @@ export class IdentityConstructs extends Construct {
                 userSrp: true,
                 userPassword: true
             },
+            oAuth: {
+                callbackUrls: ['http://localhost:3000'],  // Replace with your callback URL
+                flows: {
+                    authorizationCodeGrant: true,
+                },
+                scopes: [
+                    cognito.OAuthScope.OPENID,
+                    cognito.OAuthScope.EMAIL,
+                    cognito.OAuthScope.PROFILE,
+                ],
+            },
             generateSecret: false,
             userPoolClientName: "web-client"
         });
@@ -96,6 +108,58 @@ export class IdentityConstructs extends Construct {
                     providerName: this.userPool.userPoolProviderName,
                 },
             ],
+        });
+
+        // Create an authenticated role with some policy (modify as needed)
+        const authenticatedRole = new iam.Role(this, 'CognitoDefaultAuthenticatedRole', {
+            assumedBy: new iam.FederatedPrincipal(
+                'cognito-identity.amazonaws.com',
+                {
+                    "StringEquals": {
+                        "cognito-identity.amazonaws.com:aud": this.identityPool.ref
+                    },
+                    "ForAnyValue:StringLike": {
+                        "cognito-identity.amazonaws.com:amr": "authenticated"
+                    },
+                },
+                "sts:AssumeRoleWithWebIdentity"
+            )
+        });
+
+        authenticatedRole.addToPrincipalPolicy(new iam.PolicyStatement({
+            resources: [
+                `arn:aws:s3:::${props.storageBucket.bucketName}`,
+                `arn:aws:s3:::${props.storageBucket.bucketName}/*`,
+                `arn:aws:s3:::ekyc-liveness-check`,
+                `arn:aws:s3:::ekyc-liveness-check/*`,
+            ],
+            actions: [
+                "s3:AbortMultipartUpload",
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation"
+            ],
+        }))
+
+        authenticatedRole.addToPrincipalPolicy(new iam.PolicyStatement({
+            resources: ["*"],
+            actions: [
+                "rekognition:*"
+            ],
+        }))
+
+        // Attach any policies you want the authenticated users to have
+        // For example, giving them read access to a certain S3 bucket:
+        // const bucket = new s3.Bucket(this, 'MyBucket');
+        // bucket.grantRead(authenticatedRole);
+
+        // Add the role to the identity pool
+        new cognito.CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+            identityPoolId: this.identityPool.ref,
+            roles: {
+                'authenticated': authenticatedRole.roleArn
+            }
         });
 
 
@@ -127,6 +191,28 @@ export class IdentityConstructs extends Construct {
                 resources: [
                     `arn:aws:s3:::${props.trainingBucket.bucketName}`,
                     `arn:aws:s3:::${props.trainingBucket.bucketName}/*`,
+                ],
+                actions: [
+                    "s3:AbortMultipartUpload",
+                    "s3:GetObject",
+                    "s3:PutObject",
+                    "s3:ListBucket",
+                    "s3:GetBucketLocation"
+                ],
+            })
+        );
+
+        this.rekognitionRole = new iam.Role(this, 'RekognitionRole', {
+            assumedBy: new iam.ServicePrincipal('rekognition.amazonaws.com'),
+        })
+
+        this.rekognitionRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                resources: [
+                    `arn:aws:s3:::${props.storageBucket.bucketName}`,
+                    `arn:aws:s3:::${props.storageBucket.bucketName}/*`,
+                    `arn:aws:s3:::ekyc-liveness-check`,
+                    `arn:aws:s3:::ekyc-liveness-check/*`,
                 ],
                 actions: [
                     "s3:AbortMultipartUpload",

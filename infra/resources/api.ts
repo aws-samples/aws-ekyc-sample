@@ -16,7 +16,6 @@ import {Arn, CfnOutput, Stack} from "aws-cdk-lib";
 import * as path from "path";
 
 export interface EKYCApiConstructProps {
-
     readonly storageBucket: s3.Bucket;
     readonly trainingBucket: s3.Bucket;
     readonly sessionsTable: dynamodb.Table;
@@ -31,6 +30,7 @@ export interface EKYCApiConstructProps {
     readonly trainingTable: dynamodb.Table;
     readonly workTeam: sagemaker.CfnWorkteam
     readonly groundTruthRole: Role
+    readonly ocrServiceEndpoint: string
 }
 
 export default class EKYCApiConstruct extends Construct {
@@ -52,6 +52,8 @@ export default class EKYCApiConstruct extends Construct {
             //vpc: props.vpc,
             memorySize: 1024,
             environment: {
+                //TODO: Make this come from a cross-region stack as Rekognition Liveness check is only available in select regions
+                LivenessBucket: "ekyc-liveness-check",
                 StorageBucket: props.storageBucket.bucketName,
                 SessionTable: props.sessionsTable.tableName,
                 VerificationHistoryTable: props.verificationHistoryTable.tableName,
@@ -69,6 +71,7 @@ export default class EKYCApiConstruct extends Construct {
                 GroundTruthRoleArn: props.groundTruthRole.roleArn,
                 GroundTruthWorkTeam: `arn:aws:sagemaker:${Stack.of(this).region}:${Stack.of(this).account}:workteam/private-crowd/${props.workTeam.workteamName}`,
                 GroundTruthUiTemplateS3Uri: `s3://${props.trainingBucket.bucketName}/template/labellers.html`,
+                OcrServiceEndpoint: props.ocrServiceEndpoint
             },
             tracing: Tracing.ACTIVE
         });
@@ -138,13 +141,30 @@ export default class EKYCApiConstruct extends Construct {
                 ManagedPolicy.fromAwsManagedPolicyName("AmazonRekognitionFullAccess")
             );
 
-            lambdaRole.addManagedPolicy(
-                ManagedPolicy.fromAwsManagedPolicyName("AmazonTextractFullAccess")
-            );
+            const textractPolicyStatement = new PolicyStatement({
+                actions: [
+                    "textract:AnalyzeDocument",
+                    "textract:AnalyzeID",
+                    "textract:DetectDocumentText",
+                    // Add other Textract actions here if needed
+                ],
+                resources: ["*"], // This allows access to all documents. Adjust as per your requirements.
+            });
 
-            lambdaRole.addManagedPolicy(
-                ManagedPolicy.fromAwsManagedPolicyName("AWSXrayFullAccess")
-            );
+            backendFn.addToRolePolicy(textractPolicyStatement)
+
+            const xrayPolicyStatement = new PolicyStatement({
+                actions: [
+                    "xray:PutTraceSegments",
+                    "xray:PutTelemetryRecords",
+                    "xray:GetSamplingRules",
+                    "xray:GetSamplingTargets",
+                    "xray:GetSamplingStatisticSummaries"
+                ],
+                resources: ["*"],
+            });
+            backendFn.addToRolePolicy(xrayPolicyStatement)
+
         }
 
         const nodeId = this.node.addr;

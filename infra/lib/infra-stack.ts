@@ -14,7 +14,6 @@ permissions and limitations under the License.
  */
 
 import ekycApiConstruct from "../resources/api";
-import StorageConstruct, * as storage from "../resources/storage";
 import {IdentityConstructs} from "../resources/identity";
 import WebAppConstruct from "../resources/webapp"
 import {ParamStoreConstruct} from "../resources/param-store";
@@ -23,6 +22,11 @@ import WorkteamConstruct from "../resources/workteam";
 import EventConstructs from "../resources/events";
 import {CfnOutput, Stack, StackProps} from "aws-cdk-lib";
 import {Construct} from "constructs";
+import {TrainingWorkflowConstruct} from "../resources/trainingworkflow";
+import StorageConstruct from "../resources/storage";
+import {NetworkConstruct} from "../resources/network";
+import {OcrServiceConstruct} from "../resources/ocr-service";
+
 
 export class EkycInfraStack extends Stack {
 
@@ -33,12 +37,15 @@ export class EkycInfraStack extends Stack {
 
         // The code that defines your stack goes here
 
+        const network = new NetworkConstruct(this, "network")
+
         const storage = new StorageConstruct(this, "storage");
 
         //  const network = new NetworkConstruct(this, `network`)
 
         const identity = new IdentityConstructs(this, "identity", {
-            trainingBucket: storage.trainingBucket
+            trainingBucket: storage.trainingBucket,
+            storageBucket: storage.storageBucket,
         })
 
 
@@ -49,7 +56,24 @@ export class EkycInfraStack extends Stack {
             trainingBucket: storage.trainingBucket
         })
 
+        new TrainingWorkflowConstruct(this, 'trainingworkflow', {
+            StorageBucket: storage.storageBucket,
+            cognitoClient: identity.userPoolClient,
+            cognitoUserPool: identity.userPool,
+            workteamName: workteams.labellersWorkTeam.attrWorkteamName
+        })
+
         const param_store = new ParamStoreConstruct(this, "parameters")
+
+        const ocrService = new OcrServiceConstruct(this, 'ocr-lambda', {
+            storageBucket: storage.storageBucket,
+            vpc: network.vpc,
+            ecsRole: identity.ecsRole
+        })
+        // const ocrService = new OcrServiceConstruct(this, 'ocr-service', {
+        //     vpc: network.vpc,
+        //     ecsRole: identity.ecsRole
+        // })
 
         const api = new ekycApiConstruct(this, "ekyc-api", {
             trainingTable: storage.trainingTable,
@@ -65,7 +89,8 @@ export class EkycInfraStack extends Stack {
             RekognitionCustomLabelsProjectVersionArnParameter: param_store.rekognitionCustomLabelsProjectVersionArn,
             workTeam: workteams.labellersWorkTeam,
             groundTruthRole: identity.groundTruthRole,
-            useFieldCoordinatesExtractionMethodParameter: param_store.useFieldCoordinatesExtractionMethod
+            useFieldCoordinatesExtractionMethodParameter: param_store.useFieldCoordinatesExtractionMethod,
+            ocrServiceEndpoint: `https://${ocrService.ocrDistribution.distributionDomainName}`
         })
 
         new WebAppConstruct(this, "js-web-app", {
@@ -79,18 +104,13 @@ export class EkycInfraStack extends Stack {
                 config: {
                     region: this.region,
                     apiStage: api.api.url,
-                    cognitoUserPoolId: identity.userPool.userPoolId,
-                    cognitoAppClientId: identity.userPoolClient.userPoolClientId,
+                    userPoolId: identity.userPool.userPoolId,
+                    userPoolWebClientId: identity.userPoolClient.userPoolClientId,
                     cognitoDomain: identity.userPoolDomain.domainName,
                     identityPoolId: identity.identityPool.ref,
                 },
             }
         })
-
-        // new OcrServiceConstruct(this, 'ocr-service', {
-        //     vpc: network.vpc,
-        //     ecsRole: identity.ecsRole
-        // })
 
 
         new EventConstructs(this, 'event-triggers',

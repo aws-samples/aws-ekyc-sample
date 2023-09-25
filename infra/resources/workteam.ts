@@ -18,11 +18,13 @@ export interface WorkteamConstructProps {
 export default class WorkteamConstruct extends Construct {
 
     labellersWorkTeam: CfnWorkteam
+    labellersUserPool: cognito.UserPool
+    labellersUserPoolClient: cognito.UserPoolClient
 
     constructor(scope: Construct, id: string, props: WorkteamConstructProps) {
         super(scope, id);
 
-        const labellersUserPool = new cognito.UserPool(this, "labellers-userpool", {
+        this.labellersUserPool = new cognito.UserPool(this, "labellers-userpool", {
             userPoolName: "labellers-user-pool",
             selfSignUpEnabled: false,
             signInAliases: {
@@ -58,7 +60,7 @@ export default class WorkteamConstruct extends Construct {
         });
 
         //  User Pool Client
-        const labellersUserPoolClient = labellersUserPool.addClient("labellersuserpool-client", {
+        this.labellersUserPoolClient = this.labellersUserPool.addClient("labellersuserpool-client", {
             authFlows: {
                 adminUserPassword: true,
                 custom: true,
@@ -70,7 +72,7 @@ export default class WorkteamConstruct extends Construct {
         });
 
 
-        const labellersUserPoolDomain = labellersUserPool.addDomain(`userpool-domain-${this.node.addr}`, {
+        const labellersUserPoolDomain = this.labellersUserPool.addDomain(`userpool-domain-${this.node.addr}`, {
             cognitoDomain: {
                 domainPrefix: `${this.node.addr}`
             }
@@ -78,7 +80,7 @@ export default class WorkteamConstruct extends Construct {
 
         const userPoolGroup = new CfnUserPoolGroup(this, "labelUserGroup", {
             groupName: "labellers",
-            userPoolId: labellersUserPool.userPoolId
+            userPoolId: this.labellersUserPool.userPoolId
         })
 
         const strGroupName = userPoolGroup.groupName!;
@@ -91,9 +93,9 @@ export default class WorkteamConstruct extends Construct {
                 memberDefinitions: [
                     {
                         cognitoMemberDefinition: {
-                            cognitoClientId: labellersUserPoolClient.userPoolClientId,
+                            cognitoClientId: this.labellersUserPoolClient.userPoolClientId,
                             cognitoUserGroup: strGroupName,
-                            cognitoUserPool: labellersUserPool.userPoolId,
+                            cognitoUserPool: this.labellersUserPool.userPoolId,
                         },
                     },
                 ],
