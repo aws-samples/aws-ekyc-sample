@@ -98,6 +98,7 @@ In order to be able to make full use of the functionality of this prototype, it 
 - [API Gateway](https://aws.amazon.com/api-gateway/)
 - [Amazon Cognito](https://aws.amazon.com/cognito/)
 - [AWS Lambda](https://aws.amazon.com/lambda/)
+- [AWS ECS](https://aws.amazon.com/ecs/)
 - [AWS IAM](https://aws.amazon.com/iam/)
 - [Amazon S3](https://aws.amazon.com/s3/)
 - [Amazon SageMaker Ground Truth](https://aws.amazon.com/sagemaker/groundtruth/)

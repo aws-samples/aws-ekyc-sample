@@ -12,10 +12,10 @@ RUN apt-get update \
 
 RUN apt update \
   && apt-get install ffmpeg libsm6 libxext6 tesseract-ocr libtesseract-dev -y
-RUN pip3 install pytesseract
-RUN pip3 install opencv-python
-RUN pip3 install pillow
-RUN pip3 install pylibdmtx
+RUN pip3 install --timeout 1000 pytesseract
+RUN pip3 install --timeout 1000 opencv-python
+RUN pip3 install --timeout 1000 pillow
+RUN pip3 install --timeout 1000 pylibdmtx
 
 COPY . /app
 WORKDIR /app
