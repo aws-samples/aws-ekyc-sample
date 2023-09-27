@@ -31,13 +31,13 @@ export default class EventConstructs extends Construct {
                 handler:
                     "GroundTruthJobHandler::GroundTruthJobHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
-                    "../packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler/bin/Debug/netcoreapp3.1"
+                    "../packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler/bin/Debug/net6.0"
                 ),
                 environment: {
                     TrainingTableName: props.trainingTable.tableName,
                     TrainingBucket: props.trainingBucket.bucketName,
-                    RekognitionCustomLabelsProjectVersionArnParameterName:props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
-                    RekognitionCustomLabelsProjectArnParameterName:props.RekognitionCustomLabelsProjectArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectVersionArnParameterName: props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectArnParameterName: props.RekognitionCustomLabelsProjectArnParameter.parameterName,
                 },
             }
         );
@@ -50,7 +50,7 @@ export default class EventConstructs extends Construct {
                 triggerRekognitionCustomLabelsTrainingRole
             );
 
-            permissionUtils.addDynamoDbPermissions(props.trainingTable,triggerRekognitionCustomLabelsTrainingRole)
+            permissionUtils.addDynamoDbPermissions(props.trainingTable, triggerRekognitionCustomLabelsTrainingRole)
 
             triggerRekognitionCustomLabelsTrainingRole.addManagedPolicy(
                 iam.ManagedPolicy.fromAwsManagedPolicyName(
@@ -67,13 +67,13 @@ export default class EventConstructs extends Construct {
                 handler:
                     "CheckDatasetHandler::CheckDatasetHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
-                    "../packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject/bin/Debug/netcoreapp3.1"
+                    "../packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject/bin/Debug/net6.0"
                 ),
                 environment: {
                     TrainingTableName: props.trainingTable.tableName,
                     TrainingBucket: props.trainingBucket.bucketName,
-                    RekognitionCustomLabelsProjectVersionArnParameterName:props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
-                    RekognitionCustomLabelsProjectArnParameterName:props.RekognitionCustomLabelsProjectArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectVersionArnParameterName: props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectArnParameterName: props.RekognitionCustomLabelsProjectArnParameter.parameterName,
                 },
             }
         );
@@ -84,7 +84,7 @@ export default class EventConstructs extends Construct {
 
             props.trainingBucket.grantReadWrite(checkDatasetHandlerRole);
 
-            permissionUtils.addDynamoDbPermissions(props.trainingTable,checkDatasetHandlerRole)
+            permissionUtils.addDynamoDbPermissions(props.trainingTable, checkDatasetHandlerRole)
 
 
             checkDatasetHandlerRole.addManagedPolicy(
