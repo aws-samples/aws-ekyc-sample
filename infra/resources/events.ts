@@ -4,6 +4,7 @@ import * as events from "aws-cdk-lib/aws-events";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from 'aws-cdk-lib/aws-iam'
+import {Effect, PolicyStatement} from 'aws-cdk-lib/aws-iam'
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
 import permissionUtils from '../utils/Permissions'
 import {Construct} from "constructs";
@@ -57,6 +58,16 @@ export default class EventConstructs extends Construct {
                     "service-role/AWSLambdaBasicExecutionRole"
                 )
             );
+
+            triggerRekognitionCustomLabelsTrainingRole?.addToPrincipalPolicy(new PolicyStatement({
+                actions: ["ec2:DescribeNetworkInterfaces",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeInstances",
+                    "ec2:AttachNetworkInterface"],
+                resources: ["*"],
+                effect: Effect.ALLOW
+            }))
         }
 
         const checkDatasetHandler = new lambda.Function(
@@ -92,6 +103,16 @@ export default class EventConstructs extends Construct {
                     "service-role/AWSLambdaBasicExecutionRole"
                 )
             );
+
+            checkDatasetHandlerRole?.addToPrincipalPolicy(new PolicyStatement({
+                actions: ["ec2:DescribeNetworkInterfaces",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeInstances",
+                    "ec2:AttachNetworkInterface"],
+                resources: ["*"],
+                effect: Effect.ALLOW
+            }))
         }
 
         const GroundTruthStateChangeRule = new events.Rule(

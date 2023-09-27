@@ -9,7 +9,7 @@ import * as sagemaker from "aws-cdk-lib/aws-sagemaker"
 import * as apigateway from "aws-cdk-lib/aws-apigateway"
 import {ApiKeySourceType, AuthorizationType} from "aws-cdk-lib/aws-apigateway"
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
-import {ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
+import {Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {CfnWebACL, CfnWebACLAssociation} from "aws-cdk-lib/aws-wafv2";
 import {Construct} from "constructs";
 import {Arn, CfnOutput, Stack} from "aws-cdk-lib";
@@ -105,6 +105,7 @@ export default class EKYCApiConstruct extends Construct {
                 new PolicyStatement({
                     resources: [props.approvalsTopic.topicArn],
                     actions: ["sns:Publish"],
+                    effect: Effect.ALLOW
                 })
             );
 
@@ -114,6 +115,33 @@ export default class EKYCApiConstruct extends Construct {
                     actions: ["lambda:InvokeFunction"],
                 })
             );*/
+
+            lambdaRole?.addToPrincipalPolicy(new PolicyStatement({
+                actions: ["ec2:DescribeNetworkInterfaces",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeInstances",
+                    "ec2:AttachNetworkInterface"],
+                resources: ["*"],
+                effect: Effect.ALLOW
+            }))
+
+            lambdaRole?.addToPrincipalPolicy(
+                new PolicyStatement({
+                    resources: [
+                        `arn:aws:ssm:${Stack.of(this).region}:${
+                            Stack.of(this).account
+                        }:parameter/CFN-parametersekyc*`
+                    ],
+                    actions: [
+                        "ssm:GetParameter",
+                        "ssm:DescribeParameters",
+                        "ssm:GetParameters",
+                        "ssm:GetParametersByPath",
+                    ],
+                    effect: Effect.ALLOW
+                })
+            );
 
             lambdaRole?.addToPrincipalPolicy(
                 new PolicyStatement({
