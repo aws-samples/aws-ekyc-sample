@@ -8,12 +8,14 @@ import {Platform} from "aws-cdk-lib/aws-ecr-assets";
 import {Bucket} from "aws-cdk-lib/aws-s3";
 import {Effect, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {UserPool, UserPoolClient} from "aws-cdk-lib/aws-cognito";
+import {Vpc} from "aws-cdk-lib/aws-ec2";
 
 export interface TrainingWorkflowConstructProps {
     readonly StorageBucket: Bucket
     readonly cognitoClient: UserPoolClient
     readonly cognitoUserPool: UserPool
     readonly workteamName: string
+    readonly vpc: Vpc
 }
 
 export class TrainingWorkflowConstruct extends Construct {
@@ -23,7 +25,7 @@ export class TrainingWorkflowConstruct extends Construct {
     constructor(scope: Construct, id: string, props: TrainingWorkflowConstructProps) {
         super(scope, id);
         // Constructs for the labelling and training workflow
-
+        const {vpc} = props
 
         const lambdaRole = new Role(this, `PostLabellingFnRole${Names.uniqueId(this)}`, {
             assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
@@ -82,6 +84,7 @@ export class TrainingWorkflowConstruct extends Construct {
                 platform: Platform.LINUX_AMD64,
                 file: "dockerfile"
             }),
+            vpc: vpc,
             memorySize: 3008,
             ephemeralStorageSize: Size.gibibytes(5),
             timeout: Duration.minutes(10),
@@ -109,7 +112,6 @@ export class TrainingWorkflowConstruct extends Construct {
         })
 
         this.labellingCompleteRule.addTarget(new LambdaFunction(postLabellingLambda, {
-
             maxEventAge: Duration.hours(2), // Optional: set the maxEventAge retry policy
             retryAttempts: 2, // Optional: set the max number of retry attempts
         }));

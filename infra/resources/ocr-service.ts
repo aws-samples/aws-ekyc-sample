@@ -18,7 +18,6 @@ import {ApplicationLoadBalancer, ApplicationProtocol} from "aws-cdk-lib/aws-elas
 import {Effect, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {Topic} from "aws-cdk-lib/aws-sns";
 import {Construct} from "constructs";
-import {CloudFrontAllowedMethods, CloudFrontWebDistribution, OriginProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
 import {Bucket} from "aws-cdk-lib/aws-s3";
 
 export const OCR_SERVICE_PORT = 8000;
@@ -33,7 +32,8 @@ export class OcrServiceConstruct extends Construct {
     public readonly ecsService: Ec2Service;
     public readonly apiRole: Role;
     public readonly loadBalancer: ApplicationLoadBalancer;
-    public readonly ocrDistribution: CloudFrontWebDistribution
+
+    // public readonly ocrDistribution: CloudFrontWebDistribution
 
     constructor(scope: Construct, id: string, props: OcrServiceProps) {
         super(scope, id);
@@ -187,24 +187,24 @@ export class OcrServiceConstruct extends Construct {
             defaultTargetGroups: [targetGroup],
         });
 
-        this.ocrDistribution = new CloudFrontWebDistribution(this, 'ocrDistribution', {
-            originConfigs: [
-                {
-                    customOriginSource: {
-                        domainName: this.loadBalancer.loadBalancerDnsName,
-                        httpPort: OCR_SERVICE_PORT,
-                        httpsPort: 443,
-                        originProtocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
-                    },
-                    behaviors: [{
-                        isDefaultBehavior: true,
-                        allowedMethods: CloudFrontAllowedMethods.ALL
-                    }],
-                },
-            ]
-        })
+        // this.ocrDistribution = new CloudFrontWebDistribution(this, 'ocrDistribution', {
+        //     originConfigs: [
+        //         {
+        //             customOriginSource: {
+        //                 domainName: this.loadBalancer.loadBalancerDnsName,
+        //                 httpPort: OCR_SERVICE_PORT,
+        //                 httpsPort: 443,
+        //                 originProtocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
+        //             },
+        //             behaviors: [{
+        //                 isDefaultBehavior: true,
+        //                 allowedMethods: CloudFrontAllowedMethods.ALL
+        //             }],
+        //         },
+        //     ]
+        // })
 
 
-        new CfnOutput(this, "OcrServiceDnsName", {value: this.ocrDistribution.distributionDomainName});
+        new CfnOutput(this, "OcrServiceDnsName", {value: this.loadBalancer.loadBalancerDnsName});
     }
 }

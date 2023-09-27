@@ -14,6 +14,7 @@ import {CfnWebACL, CfnWebACLAssociation} from "aws-cdk-lib/aws-wafv2";
 import {Construct} from "constructs";
 import {Arn, CfnOutput, Stack} from "aws-cdk-lib";
 import * as path from "path";
+import {Vpc} from "aws-cdk-lib/aws-ec2";
 
 export interface EKYCApiConstructProps {
     readonly storageBucket: s3.Bucket;
@@ -31,6 +32,7 @@ export interface EKYCApiConstructProps {
     readonly workTeam: sagemaker.CfnWorkteam
     readonly groundTruthRole: Role
     readonly ocrServiceEndpoint: string
+    readonly vpc: Vpc
 }
 
 export default class EKYCApiConstruct extends Construct {
@@ -42,8 +44,10 @@ export default class EKYCApiConstruct extends Construct {
 
     constructor(scope: Construct, id: string, props: EKYCApiConstructProps) {
         super(scope, id);
+        const {vpc} = props
 
         const backendFn = new lambda.Function(this, "ekyc-proxy-handler", {
+            vpc: vpc,
             runtime: lambda.Runtime.DOTNET_6,
             handler: "ekyc-api::ekyc_api.LambdaEntryPoint::FunctionHandlerAsync",
             code: lambda.Code.fromAsset(

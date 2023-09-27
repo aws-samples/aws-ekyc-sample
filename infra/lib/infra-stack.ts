@@ -25,7 +25,7 @@ import {Construct} from "constructs";
 import {TrainingWorkflowConstruct} from "../resources/trainingworkflow";
 import StorageConstruct from "../resources/storage";
 import {NetworkConstruct} from "../resources/network";
-import {OcrServiceConstruct} from "../resources/ocr-service";
+import {OCR_SERVICE_PORT, OcrServiceConstruct} from "../resources/ocr-service";
 
 
 export class EkycInfraStack extends Stack {
@@ -60,7 +60,8 @@ export class EkycInfraStack extends Stack {
             StorageBucket: storage.storageBucket,
             cognitoClient: identity.userPoolClient,
             cognitoUserPool: identity.userPool,
-            workteamName: workteams.labellersWorkTeam.attrWorkteamName
+            workteamName: workteams.labellersWorkTeam.attrWorkteamName,
+            vpc: network.vpc
         })
 
         const param_store = new ParamStoreConstruct(this, "parameters")
@@ -76,6 +77,7 @@ export class EkycInfraStack extends Stack {
         // })
 
         const api = new ekycApiConstruct(this, "ekyc-api", {
+            vpc: network.vpc,
             trainingTable: storage.trainingTable,
             storageBucket: storage.storageBucket,
             trainingBucket: storage.trainingBucket,
@@ -90,7 +92,7 @@ export class EkycInfraStack extends Stack {
             workTeam: workteams.labellersWorkTeam,
             groundTruthRole: identity.groundTruthRole,
             useFieldCoordinatesExtractionMethodParameter: param_store.useFieldCoordinatesExtractionMethod,
-            ocrServiceEndpoint: `https://${ocrService.ocrDistribution.distributionDomainName}`
+            ocrServiceEndpoint: `http://${ocrService.loadBalancer.loadBalancerDnsName}:${OCR_SERVICE_PORT}`
         })
 
         new WebAppConstruct(this, "js-web-app", {
