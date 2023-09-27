@@ -18,7 +18,7 @@ import {ApplicationLoadBalancer, ApplicationProtocol} from "aws-cdk-lib/aws-elas
 import {Effect, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {Topic} from "aws-cdk-lib/aws-sns";
 import {Construct} from "constructs";
-import {CloudFrontWebDistribution, OriginProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
+import {CloudFrontAllowedMethods, CloudFrontWebDistribution, OriginProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
 import {Bucket} from "aws-cdk-lib/aws-s3";
 
 export const OCR_SERVICE_PORT = 8000;
@@ -196,7 +196,10 @@ export class OcrServiceConstruct extends Construct {
                         httpsPort: 443,
                         originProtocolPolicy: OriginProtocolPolicy.HTTP_ONLY,
                     },
-                    behaviors: [{isDefaultBehavior: true}],
+                    behaviors: [{
+                        isDefaultBehavior: true,
+                        allowedMethods: CloudFrontAllowedMethods.ALL
+                    }],
                 },
             ]
         })
