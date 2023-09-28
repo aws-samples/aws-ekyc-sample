@@ -80,15 +80,6 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
         // Make the image greyscale and increase contrast to make it easier for Textract
         originalImage.Mutate(i => i.Grayscale().Contrast(2));
 
-        using (var ms = new MemoryStream())
-        {
-            await originalImage.SaveAsPngAsync(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-            using (var fs = File.Open("processed.png", FileMode.Create))
-            {
-                fs.Write(ms.ToArray());
-            }
-        }
 
         // Step 2. Use Textract to obtain bounding boxes of known “anchor” points
 
@@ -134,15 +125,6 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
             degreesToRotate = Imaging.ConvertRadiansToDegrees(degreesToRotate);
             originalImage.Mutate(i => i.Rotate(Convert.ToSingle(degreesToRotate * -1d)));
             needsBlockRetrieval = true;
-            using (var ms = new MemoryStream())
-            {
-                await originalImage.SaveAsPngAsync(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-                using (var fs = File.Open("rotated.png", FileMode.Create))
-                {
-                    fs.Write(ms.ToArray());
-                }
-            }
         }
         else if (dobBlock.Geometry.Polygon[0].Y > dobBlock.Geometry.Polygon[1].Y)
         {
@@ -155,15 +137,6 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
 
             originalImage.Mutate(i => i.Rotate(Convert.ToSingle(degreesToRotate)));
             needsBlockRetrieval = true;
-            using (var ms = new MemoryStream())
-            {
-                await originalImage.SaveAsPngAsync(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-                using (var fs = File.Open("rotated.png", FileMode.Create))
-                {
-                    fs.Write(ms.ToArray());
-                }
-            }
         }
 
         using (var ms = new MemoryStream())
@@ -296,10 +269,6 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
             {
                 await thaiAddressImage.SaveAsPngAsync(ms);
                 ms.Seek(0, SeekOrigin.Begin);
-                using (var fs = File.Open("temp-address.png", FileMode.Create))
-                {
-                    fs.Write(ms.ToArray());
-                }
 
                 var tessResponse = await Tesseract.CallTesseractApi(ms, "address.png");
                 if (!string.IsNullOrEmpty(tessResponse.result))

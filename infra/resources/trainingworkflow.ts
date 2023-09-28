@@ -6,7 +6,7 @@ import * as events from "aws-cdk-lib/aws-events"
 import {LambdaFunction} from "aws-cdk-lib/aws-events-targets";
 import {Platform} from "aws-cdk-lib/aws-ecr-assets";
 import {Bucket} from "aws-cdk-lib/aws-s3";
-import {Effect, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
+import {Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {UserPool, UserPoolClient} from "aws-cdk-lib/aws-cognito";
 import {Vpc} from "aws-cdk-lib/aws-ec2";
 
@@ -31,6 +31,12 @@ export class TrainingWorkflowConstruct extends Construct {
             assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
             roleName: `${id}-PostLabellingFnRole`,
         })
+
+        lambdaRole.addManagedPolicy(
+            ManagedPolicy.fromAwsManagedPolicyName(
+                "service-role/AWSLambdaVPCAccessExecutionRole"
+            )
+        );
 
         // Basic execution
         lambdaRole.addToPolicy(

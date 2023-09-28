@@ -12,7 +12,7 @@ import {StringParameter} from "aws-cdk-lib/aws-ssm";
 import {Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {CfnWebACL, CfnWebACLAssociation} from "aws-cdk-lib/aws-wafv2";
 import {Construct} from "constructs";
-import {Arn, CfnOutput, Stack} from "aws-cdk-lib";
+import {Arn, CfnOutput, Duration, Stack} from "aws-cdk-lib";
 import * as path from "path";
 import {Vpc} from "aws-cdk-lib/aws-ec2";
 
@@ -36,7 +36,6 @@ export interface EKYCApiConstructProps {
 }
 
 export default class EKYCApiConstruct extends Construct {
-    public readonly execRole: Role;
 
     public readonly api: apigateway.LambdaRestApi;
 
@@ -48,13 +47,14 @@ export default class EKYCApiConstruct extends Construct {
 
         const backendFn = new lambda.Function(this, "ekyc-proxy-handler", {
             vpc: vpc,
+            timeout: Duration.minutes(1),
             runtime: lambda.Runtime.DOTNET_6,
             handler: "ekyc-api::ekyc_api.LambdaEntryPoint::FunctionHandlerAsync",
             code: lambda.Code.fromAsset(
                 path.join(__dirname, "../../packages/ekyc-api/src/ekyc-api/bin/Debug/net6.0")
             ),
             //vpc: props.vpc,
-            memorySize: 1024,
+            memorySize: 4096,
             environment: {
                 //TODO: Make this come from a cross-region stack as Rekognition Liveness check is only available in select regions
                 LivenessBucket: "ekyc-liveness-check",
@@ -161,7 +161,7 @@ export default class EKYCApiConstruct extends Construct {
 
             lambdaRole.addManagedPolicy(
                 ManagedPolicy.fromAwsManagedPolicyName(
-                    "service-role/AWSLambdaBasicExecutionRole"
+                    "service-role/AWSLambdaVPCAccessExecutionRole"
                 )
             );
 

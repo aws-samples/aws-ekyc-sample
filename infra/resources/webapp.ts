@@ -3,7 +3,6 @@ import {CustomResource} from "aws-cdk-lib/core";
 import {Bucket} from "aws-cdk-lib/aws-s3";
 import * as s3Deployment from "aws-cdk-lib/aws-s3-deployment";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
-import CloudFrontWebAcl from './cloudfront-web-acl'
 import * as lambda from "aws-cdk-lib/aws-lambda"
 import {Code, Runtime} from "aws-cdk-lib/aws-lambda"
 import {Construct} from "constructs";
@@ -47,7 +46,7 @@ interface WebAppConstructProps {
 
 export default class WebAppConstruct extends Construct {
 
-    cfWeb: cloudfront.CloudFrontWebDistribution
+
     cfWebV2: cloudfront.CloudFrontWebDistribution
 
     constructor(scope: Construct, id: string, props: WebAppConstructProps) {
@@ -63,40 +62,11 @@ export default class WebAppConstruct extends Construct {
         props.webBucket.grantRead(oai);
 
 
-        const webAcl = new CloudFrontWebAcl(this, 'WebACL', {
-            name: `${this.node.addr}-WebAcl`,
-            managedRules: [{VendorName: 'AWS', Name: 'AWSManagedRulesCommonRuleSet'}],
-        });
+        // const webAclv2 = new CloudFrontWebAcl(this, 'WebACLV2', {
+        //     name: `${this.node.addr}-WebAclV2`,
+        //     managedRules: [{VendorName: 'AWS', Name: 'AWSManagedRulesCommonRuleSet'}],
+        // });
 
-        const webAclv2 = new CloudFrontWebAcl(this, 'WebACLV2', {
-            name: `${this.node.addr}-WebAclV2`,
-            managedRules: [{VendorName: 'AWS', Name: 'AWSManagedRulesCommonRuleSet'}],
-        });
-
-        this.cfWeb = new cloudfront.CloudFrontWebDistribution(
-            this,
-            "js-web-distribution",
-            {
-                errorConfigurations: [
-                    {
-                        errorCode: 404,
-                        responseCode: 200,
-                        responsePagePath: "/index.html",
-                    },
-                ],
-                originConfigs: [
-                    {
-                        s3OriginSource: {
-                            originPath: "/webui",
-                            s3BucketSource: props.webBucket,
-                            originAccessIdentity: oai,
-                        },
-                        behaviors: [{isDefaultBehavior: true}],
-                    },
-                ],
-                webACLId: webAcl.getArn(core.Stack.of(this).account),
-            },
-        );
 
         this.cfWebV2 = new cloudfront.CloudFrontWebDistribution(
             this,
@@ -119,37 +89,18 @@ export default class WebAppConstruct extends Construct {
                         behaviors: [{isDefaultBehavior: true}],
                     },
                 ],
-                webACLId: webAclv2.getArn(core.Stack.of(this).account),
+                //webACLId: webAclv2.getArn(Stack.of(this).account),
             },
         );
 
 
-        new core.CfnOutput(this, "JS-CloudFrontUrl", {
-            value: this.cfWeb.distributionDomainName,
-        });
-
-        new core.CfnOutput(this, "JS-CloudFrontDistributionId", {
-            value: this.cfWeb.distributionId,
-        });
-
-        new core.CfnOutput(this, "JS-CloudFrontUrlV2", {
+        new core.CfnOutput(this, "Web-CloudFrontUrlV2", {
             value: this.cfWebV2.distributionDomainName,
         });
 
-        new core.CfnOutput(this, "JS-CloudFrontDistributionIdV2", {
+        new core.CfnOutput(this, "Web-CloudFrontDistributionIdV2", {
             value: this.cfWebV2.distributionId,
         });
-
-        const deployment = new s3Deployment.BucketDeployment(
-            this,
-            "deployJSsite",
-            {
-                sources: [s3Deployment.Source.asset("../packages/ui/build")],
-                destinationBucket: props.webBucket,
-                distribution: this.cfWeb,
-                destinationKeyPrefix: "webui",
-            }
-        )
 
         const deploymentV2 = new s3Deployment.BucketDeployment(
             this,
@@ -157,7 +108,7 @@ export default class WebAppConstruct extends Construct {
             {
                 sources: [s3Deployment.Source.asset("../packages/webv2/build")],
                 destinationBucket: props.webBucket,
-                distribution: this.cfWeb,
+                distribution: this.cfWebV2,
                 destinationKeyPrefix: "webv2",
             }
         )
@@ -201,26 +152,6 @@ export default class WebAppConstruct extends Construct {
 
             const websiteConfiguration = JSON.stringify(props.configuration.config, null, 2)
 
-            const uploadWebsiteConfigResource = new CustomResource(
-                this,
-                `UploadWebsiteConfigResource`,
-                {
-                    serviceToken: uploadWebsiteConfigProvider.serviceToken,
-                    // Pass the mapping file attributes as a property. Every time the mapping file changes, the custom resource will be updated which will trigger the corresponding Lambda.
-                    properties: {
-                        S3_BUCKET: props.webBucket.bucketName,
-                        S3_CONFIG_FILE_KEY: "webui/" + props.configuration.outputS3Key,
-                        WEBSITE_CONFIG: websiteConfiguration,
-                        CLOUDFRONT_DISTRIBUTION_ID:
-                        this.cfWeb.distributionId,
-                        // The bucket deployment clears the s3 bucket, so we must always run the custom resource to write the config
-                        ALWAYS_UPDATE: new Date().toISOString(),
-                    },
-                }
-            );
-
-            uploadWebsiteConfigResource.node.addDependency(deployment);
-
 
             const uploadWebsiteConfigResourcev2 = new CustomResource(
                 this,
@@ -233,7 +164,7 @@ export default class WebAppConstruct extends Construct {
                         S3_CONFIG_FILE_KEY: "webv2/" + props.configuration.outputS3Key,
                         WEBSITE_CONFIG: websiteConfiguration,
                         CLOUDFRONT_DISTRIBUTION_ID:
-                        this.cfWeb.distributionId,
+                        this.cfWebV2.distributionId,
                         // The bucket deployment clears the s3 bucket, so we must always run the custom resource to write the config
                         ALWAYS_UPDATE: new Date().toISOString(),
                     },

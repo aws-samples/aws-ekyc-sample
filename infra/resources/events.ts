@@ -8,6 +8,7 @@ import {Effect, PolicyStatement} from 'aws-cdk-lib/aws-iam'
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
 import permissionUtils from '../utils/Permissions'
 import {Construct} from "constructs";
+import {Duration} from "aws-cdk-lib";
 
 //import * as eventTargets from '@aws-cdk/aws-events-targets'
 
@@ -29,6 +30,7 @@ export default class EventConstructs extends Construct {
             "groundtruth-eventchange-handler",
             {
                 runtime: lambda.Runtime.DOTNET_6,
+                timeout: Duration.minutes(1),
                 handler:
                     "GroundTruthJobHandler::GroundTruthJobHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
@@ -75,6 +77,7 @@ export default class EventConstructs extends Construct {
             "check-dataset-handler",
             {
                 runtime: lambda.Runtime.DOTNET_6,
+                timeout: Duration.minutes(1),
                 handler:
                     "CheckDatasetHandler::CheckDatasetHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
