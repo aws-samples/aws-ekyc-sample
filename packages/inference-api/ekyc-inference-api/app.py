@@ -7,16 +7,16 @@ from pytesseract import pytesseract
 from werkzeug.utils import secure_filename
 
 from thai_id import extract_thai_id_front_info, extract_thai_id_back_info, card_to_dict
-from util import is_running_in_lambda
 
 os.environ["TESSDATA_PREFIX"] = os.path.abspath("./static/tessdata")
 
 
 def get_upload_folder():
-    if is_running_in_lambda():
-        return '/tmp/uploads'
-    else:
-        return './static/uploads'
+    return '/tmp/uploads'
+    # if is_running_in_lambda():
+    #     return '/tmp/uploads'
+    # else:
+    #     return './static/uploads'
 
 
 app = Flask(__name__)

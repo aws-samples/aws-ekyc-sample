@@ -1,11 +1,5 @@
-import os
-
 import cv2
 import numpy as np
-
-
-def is_running_in_lambda():
-    return os.environ.get("AWS_EXECUTION_ENV") is not None
 
 
 # get grayscale image
