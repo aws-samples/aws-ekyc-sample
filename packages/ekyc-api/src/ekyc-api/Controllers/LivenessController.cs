@@ -88,7 +88,7 @@ public class LivenessController : ControllerBase
     {
         // Need to hardcode the region as Liveness is not supported in all regions yet
         var rekognitionClient = new AmazonRekognitionClient(RegionEndpoint.APNortheast1);
-        var s3ClientAPNE1 = new AmazonS3Client(RegionEndpoint.APNortheast1);
+
         var response = await rekognitionClient.GetFaceLivenessSessionResultsAsync(
             new GetFaceLivenessSessionResultsRequest
             {

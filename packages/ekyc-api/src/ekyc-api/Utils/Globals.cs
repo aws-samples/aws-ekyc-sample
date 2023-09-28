@@ -22,8 +22,6 @@ public class Globals
 
     public static string StorageBucket => Environment.GetEnvironmentVariable("StorageBucket");
 
-    public static string LivenessBucket => Environment.GetEnvironmentVariable("LivenessBucket");
-
     public static string SessionTableName => Environment.GetEnvironmentVariable("SessionTable");
 
     public static string VerificationHistoryTableName =>

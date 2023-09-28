@@ -28,7 +28,7 @@ export const SessionResult: FC<{ sessionId: string }> = ({sessionId}) => {
             {!isLoadingImageUrlData && compareSelfieWithDocumentData &&
                 <SpaceBetween size={"m"}>
                     <TextContent>{compareSelfieWithDocumentData.isSimilar ? "Faces match" : "Faces do not match."}</TextContent>
-                    <TextContent>Confidence: {compareSelfieWithDocumentData.similarity}%</TextContent>
+                    
                 </SpaceBetween>
             }
             {!isLoadingImageUrlData && imageUrlData && compareSelfieWithDocumentData &&
