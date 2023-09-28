@@ -92,7 +92,7 @@ export class EkycInfraStack extends Stack {
             workTeam: workteams.labellersWorkTeam,
             groundTruthRole: identity.groundTruthRole,
             useFieldCoordinatesExtractionMethodParameter: param_store.useFieldCoordinatesExtractionMethod,
-            ocrServiceEndpoint: `http://${ocrService.loadBalancer.loadBalancerDnsName}:${OCR_SERVICE_PORT}`
+            ocrServiceEndpoint: `http://${ocrService.ecsService.loadBalancer.loadBalancerDnsName}:${OCR_SERVICE_PORT}`
         })
 
         new WebAppConstruct(this, "js-web-app", {

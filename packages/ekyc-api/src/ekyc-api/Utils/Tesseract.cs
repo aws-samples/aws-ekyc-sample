@@ -16,7 +16,7 @@ public class Tesseract
 
         var options = new RestClientOptions(Globals.OcrServiceEndpoint)
         {
-            MaxTimeout = -1
+            MaxTimeout = 15000
         };
         var client = new RestClient(options);
         var request = new RestRequest("/thai", Method.Post);
@@ -40,7 +40,7 @@ public class Tesseract
 
         var options = new RestClientOptions(Globals.OcrServiceEndpoint)
         {
-            MaxTimeout = -1
+            MaxTimeout = 15000
         };
 
         ms.Seek(0, SeekOrigin.Begin);

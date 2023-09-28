@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -156,10 +155,6 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
                 textBlocks = await GetTextractValuesFromImage(ms);
             }
 
-        using (var fs = File.Open("text-blocks.json", FileMode.Create))
-        {
-            fs.Write(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(textBlocks)));
-        }
 
         var doeBlock = textBlocks.FirstOrDefault(tb => tb.Text?.Trim() == "Date of Expiry");
 
@@ -195,57 +190,6 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
 
         if (doiValueBlock != null && !string.IsNullOrEmpty(doiValueBlock.Text))
             values.Add("Date of Issue", doiValueBlock.Text);
-
-
-        // var namePrefix = "Name ";
-        // var nameBlock =
-        //     textBlocks.FirstOrDefault(tb => tb.Text?.StartsWith(namePrefix) == true && tb.BlockType == BlockType.LINE);
-        //
-        // if (nameBlock != null)
-        // {
-        //     if (nameBlock.Text.Length > namePrefix.Length)
-        //         values.Add("Name", nameBlock.Text.Substring(namePrefix.Length));
-        //
-        //     // Get the Thai name using the ID block
-        //
-        //     var startLeft = idBlock.Geometry.BoundingBox.Left + idBlock.Geometry.BoundingBox.Left * 0.48f;
-        //     var thaiNameImage = await Imaging.CloneCropImage(originalImage,
-        //         idBlock.Geometry.BoundingBox.Top + idBlock.Geometry.BoundingBox.Height,
-        //         startLeft, 1f - startLeft,
-        //         nameBlock.Geometry.BoundingBox.Top -
-        //         (idBlock.Geometry.BoundingBox.Top + idBlock.Geometry.BoundingBox.Height));
-        //
-        //     using (var ms = new MemoryStream())
-        //     {
-        //         await thaiNameImage.SaveAsPngAsync(ms);
-        //         ms.Seek(0, SeekOrigin.Begin);
-        //         using (var fs = File.Open("thai-name-temp.png", FileMode.Create))
-        //         {
-        //             fs.Write(ms.ToArray());
-        //         }
-        //
-        //         var tessResponse = await Tesseract.CallTesseractApi(ms, "thai-name.png");
-        //         if (!string.IsNullOrEmpty(tessResponse.result))
-        //         {
-        //             // Check if we've included extra characters in front
-        //
-        //             var thaiName = tessResponse.result;
-        //
-        //             foreach (var prefix in ThaiNamePrefixes)
-        //             {
-        //                 var prefixIndex = thaiName.IndexOf(prefix, StringComparison.Ordinal);
-        //                 if (prefixIndex >= 0)
-        //                 {
-        //                     thaiName = thaiName.Substring(prefixIndex);
-        //                     break;
-        //                 }
-        //             }
-        //
-        //             values.Add("Thai Name", thaiName);
-        //             values.Add("Gender", GenderPrefixMatcher(thaiName));
-        //         }
-        //     }
-        // }
 
         var lastNamePrefix = "Last name ";
         var lastNameBlock =

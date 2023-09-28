@@ -48,7 +48,6 @@ const NAVIGATION_ITEMS: SideNavigationProps.Item[] = [
     {text: "Training Jobs", type: "link", href: "/training"},
     {text: "New Training Job", type: "link", href: "/newtraining"},
     {type: 'divider'},
-    {text: "Settings", type: "link", href: "/settings"},
 ];
 
 const queryClient = new QueryClient();

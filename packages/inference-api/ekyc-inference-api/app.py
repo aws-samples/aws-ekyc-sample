@@ -2,7 +2,7 @@ import os
 
 import cv2
 from PIL import Image
-from flask import jsonify, Flask, render_template, request
+from flask import jsonify, Flask, request
 from pytesseract import pytesseract
 from werkzeug.utils import secure_filename
 
@@ -12,7 +12,7 @@ os.environ["TESSDATA_PREFIX"] = os.path.abspath("./static/tessdata")
 
 
 def get_upload_folder():
-    return '/tmp/uploads'
+    return '/tmp'
     # if is_running_in_lambda():
     #     return '/tmp/uploads'
     # else:
@@ -31,7 +31,7 @@ def healthcheck():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return jsonify({"msg": "OK"})
 
 
 @app.route('/thai', methods=['POST'])
@@ -41,6 +41,7 @@ def detect_thai_text():
 
     # save file to /static/uploads
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    print(f'Saving file to {filepath}')
     f.save(filepath)
     image = cv2.imread(filepath)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -81,6 +82,7 @@ def detect_thai_id_front():
 
         # save file to /static/uploads
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print(f'Saving file to {filepath}')
         f.save(filepath)
 
         # load the example image and convert it to grayscale
@@ -108,6 +110,7 @@ def detect_thai_id_back():
 
         # save file to /static/uploads
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        print(f'Saving file to {filepath}')
         f.save(filepath)
 
         # load the example image and convert it to grayscale
