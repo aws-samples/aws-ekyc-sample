@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Amazon.Runtime.Internal.Transform;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.Textract;
@@ -23,8 +24,8 @@ namespace ekyc_api.DocumentDefinitions.THAI_ID;
 public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
 {
     private readonly IConfiguration _config;
+    private readonly IDocumentDefinitionFactory _factory;
     private readonly IAmazonS3 _s3Client;
-
     private readonly IAmazonTextract _textractClient;
 
     private readonly string[] ThaiNamePrefixes =
@@ -33,29 +34,26 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
         "ศาสตราจารย์เกียรติคุณ (กิตติคุณ)", "ศาสตราจารย์", "ผู้ช่วยศาสตราจารย์", "รองศาสตราจารย์"
     };
 
-    private List<Block> Blocks;
 
     public Thai_ID_Front_TextractFieldValueExtractor(IAmazonS3 s3Client, IAmazonTextract textractClient,
+        IDocumentDefinitionFactory factory,
         IConfiguration config,
         ILogger logger)
     {
         _config = config;
+        _factory = factory;
         _textractClient = textractClient;
         _s3Client = s3Client;
     }
-
 
     public async Task<Dictionary<string, string>> GetFieldValues(string s3Key, string RekognitionCustomLabelsProjectArn,
         DocumentTypes documentType)
     {
         AWSXRayRecorder.Instance.BeginSubsegment("Thai_ID_Front_TextractFieldValueExtractor::GetFieldValues");
 
-        if (Blocks == null)
-            await LoadBlocks(s3Key);
+        var newKey = await Imaging.CropDocumentByLabel(s3Key, "Driving License");
 
         var values = new Dictionary<string, string>();
-
-        var newKey = s3Key;
 
         // if (RekognitionCustomLabelsProjectArn != null)
         //     newKey = await Imaging.CropDocument(s3Key, RekognitionCustomLabelsProjectArn, documentType);
@@ -76,8 +74,12 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
         msImage.Seek(0, SeekOrigin.Begin);
         var originalImage = await Image.LoadAsync(msImage);
 
+        var newWidth = 1000;
+        var newHeight = (int)(newWidth * ((double)originalImage.Height / originalImage.Width));
+
         // Make the image greyscale and increase contrast to make it easier for Textract
-        originalImage.Mutate(i => i.Grayscale().Contrast(2));
+        originalImage.Mutate(i => i.Resize(newWidth, newHeight));
+        //     .GaussianSharpen(0.5f).Contrast(1));
 
 
         // Step 2. Use Textract to obtain bounding boxes of known “anchor” points
@@ -94,12 +96,18 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
         var thaiDateRegex = new Regex(strThaiDateRegex);
 
         var textBlocks = await GetTextractValuesFromImage(msImage);
-        msImage.Seek(0, SeekOrigin.Begin);
 
+        msImage.Seek(0, SeekOrigin.Begin);
 
         var idBlock = textBlocks.FirstOrDefault(tb => tb.Text?.Trim() == "Identification Number");
 
         if (idBlock == null) throw new Exception("Cannot find identification number text block on ID.");
+
+        var nameBlock =
+            textBlocks.FirstOrDefault(tb =>
+                tb.BlockType == BlockType.LINE && tb.Text != null && tb.Text.Trim().StartsWith("Name"));
+
+        if (nameBlock == null) throw new Exception("Cannot find name text block on ID.");
 
         var idTitleBlock = textBlocks.FirstOrDefault(tb => tb.Text?.Trim().StartsWith("Thai National ID") ?? false);
 
@@ -138,15 +146,17 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
             needsBlockRetrieval = true;
         }
 
-        using (var ms = new MemoryStream())
-        {
-            await originalImage.SaveAsPngAsync(ms);
-            var fieldValues = await Tesseract.GetThaiIdFrontDataFromTesseract(ms, "front.png");
+        if (!Globals.IsRunningOnLambda) await originalImage.SaveAsPngAsync("rotated.png");
 
-            var items = Globals.ToDictionary<string>(fieldValues);
-            foreach (var item in items)
-                values.Add(item.Key, item.Value);
-        }
+        // using (var ms = new MemoryStream())
+        // {
+        //     await originalImage.SaveAsPngAsync(ms);
+        //     var fieldValues = await Tesseract.GetThaiIdFrontDataFromTesseract(ms, "front.png");
+        //
+        //     var items = Globals.ToDictionary<string>(fieldValues);
+        //     foreach (var item in items)
+        //         values.Add(item.Key, item.Value);
+        // }
 
         if (needsBlockRetrieval)
             using (var ms = new MemoryStream())
@@ -164,6 +174,25 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
 
         if (doiBlock == null) throw new Exception("Cannot find date of issue text block on ID.");
 
+        using (var ms = new MemoryStream())
+        {
+            await originalImage.SaveAsPngAsync(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            var tessResponse = await Tesseract.GetThaiIdFrontDataFromTesseract(ms, "front.png");
+            values = values
+                .Union(tessResponse.ToDictionary())
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+        }
+
+        // Get fields from base
+
+        // var fieldData = await GetFieldDataByCoordinates(originalImage, textBlocks);
+        //
+        // if (fieldData.Count > 0)
+        //     values = values
+        //         .Union(fieldData)
+        //         .ToDictionary(pair => pair.Key, pair => pair.Value);
+
         // Find the date of expiry
 
         var doeValueBlock = textBlocks
@@ -176,7 +205,7 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
             .FirstOrDefault();
 
         if (doeValueBlock != null && !string.IsNullOrEmpty(doeValueBlock.Text))
-            values.Add("Date of Expiry", doeValueBlock.Text);
+            values["Date of Expiry"] = doeValueBlock.Text;
 
         // Find the date of issue
         var doiValueBlock = textBlocks
@@ -189,35 +218,61 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
             .FirstOrDefault();
 
         if (doiValueBlock != null && !string.IsNullOrEmpty(doiValueBlock.Text))
-            values.Add("Date of Issue", doiValueBlock.Text);
+            values["Date of Issue"] = doiValueBlock.Text;
+
+
+        // Thai name - we need to use the left edge of date of issue
+        var thaiNameImage =
+            await Imaging.CloneCropImage(originalImage,
+                idBlock.Geometry.BoundingBox.Top + idBlock.Geometry.BoundingBox.Height,
+                nameBlock.Geometry.BoundingBox.Left - 0.05f,
+                1 - nameBlock.Geometry.BoundingBox.Left + 0.02f,
+                nameBlock.Geometry.BoundingBox.Top -
+                (idBlock.Geometry.BoundingBox.Top + idBlock.Geometry.BoundingBox.Height));
+
+        using (var ms = new MemoryStream())
+        {
+            await thaiNameImage.SaveAsPngAsync(ms);
+            if (!Globals.IsRunningOnLambda) await thaiNameImage.SaveAsPngAsync("thai-name.png");
+            ms.Seek(0, SeekOrigin.Begin);
+
+            var tessResponse = await Tesseract.CallTesseractApi(ms, "thai-name.png");
+            if (!string.IsNullOrEmpty(tessResponse.result))
+                values["FullNameTH"] = tessResponse.result;
+        }
 
         var lastNamePrefix = "Last name ";
         var lastNameBlock =
             textBlocks.FirstOrDefault(tb =>
                 tb.Text?.StartsWith(lastNamePrefix) == true && tb.BlockType == BlockType.LINE);
         if (lastNameBlock != null)
-        {
             if (lastNameBlock.Text.Length > lastNamePrefix.Length)
-                values.Add("Last Name", lastNameBlock.Text.Substring(lastNamePrefix.Length));
+                values["LastNameEN"] = lastNameBlock.Text.Substring(lastNamePrefix.Length);
 
-            // Thai Address - we need to use the left edge of date of issue
-            var thaiAddressImage =
-                await Imaging.CloneCropImage(originalImage,
-                    dobBlock.Geometry.BoundingBox.Top + dobBlock.Geometry.BoundingBox.Height * 2,
-                    doiBlock.Geometry.BoundingBox.Left,
-                    doeBlock.Geometry.BoundingBox.Left + doeBlock.Geometry.BoundingBox.Width -
-                    doiBlock.Geometry.BoundingBox.Left,
-                    0.1f);
+        // Thai Address - we need to use the left edge of date of issue
+        var thaiAddressImage =
+            await Imaging.CloneCropImage(originalImage,
+                doiBlock.Geometry.BoundingBox.Top - 0.3f,
+                doiBlock.Geometry.BoundingBox.Left,
+                0.75f - doiBlock.Geometry.BoundingBox.Left,
+                doiBlock.Geometry.BoundingBox.Height * 5);
 
-            using (var ms = new MemoryStream())
-            {
-                await thaiAddressImage.SaveAsPngAsync(ms);
-                ms.Seek(0, SeekOrigin.Begin);
+        using (var ms = new MemoryStream())
+        {
+            await thaiAddressImage.SaveAsPngAsync(ms);
+            if (!Globals.IsRunningOnLambda) await thaiAddressImage.SaveAsPngAsync("thai-address.png");
+            ms.Seek(0, SeekOrigin.Begin);
 
-                var tessResponse = await Tesseract.CallTesseractApi(ms, "address.png");
-                if (!string.IsNullOrEmpty(tessResponse.result))
-                    values.Add("Address", tessResponse.result);
-            }
+            var tessResponse = await Tesseract.CallTesseractApi(ms, "thai-address.png");
+            if (!string.IsNullOrEmpty(tessResponse.result))
+                values.Add("Thai Address", tessResponse.result);
+        }
+
+        if (values.ContainsKey("FullNameTH"))
+        {
+            var gender = GenderPrefixMatcher(values["FullNameTH"]);
+            if (!string.IsNullOrEmpty(gender))
+                values.Add("Gender", gender);
         }
 
         AWSXRayRecorder.Instance.EndSubsegment();
@@ -225,9 +280,94 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
         return values;
     }
 
+    public async Task<Dictionary<string, string>> GetFieldDataByCoordinates(Image image, List<Block> Blocks)
+    {
+        AWSXRayRecorder.Instance.BeginSubsegment("DocumentDefinition::GetFieldDataByCoordinates");
+
+        var returnVal = new Dictionary<string, string>();
+
+        var definition = await _factory.GetDocumentDefinition(DocumentTypes.THAI_ID_FRONT);
+
+        if (definition.DataFields == null || definition.DataFields.Length == 0)
+            return returnVal;
+
+
+        var lines = Blocks
+            .Where(x => x.Confidence > Globals.GetMinimumConfidence() && x.BlockType == BlockType.LINE)
+            .OrderBy(x => x.Geometry.BoundingBox.Top)
+            .ThenBy(x => x.Geometry.BoundingBox.Left)
+            .ToList();
+
+
+        // foreach (var line in lines)
+        //    Console.WriteLine(line.Text);
+        //      $"{line.Text} - X: {line.Geometry.BoundingBox.Left} Y: {line.Geometry.BoundingBox.Top} Width: {line.Geometry.BoundingBox.Width} Height: {line.Geometry.BoundingBox.Height}");
+
+
+        foreach (var field in definition.DataFields)
+            if (field.Language == null || field.Language.ToLower() != "th")
+            {
+                // Get all the extracted lines that fall within the expected bounding box of the field
+                var matchingLines = lines.Where(f =>
+                        Math.Abs(f.Geometry.BoundingBox.Left - field.ExpectedBoundingBox.Left) <=
+                        Globals.BoundingBoxVarianceThreshold &&
+                        Math.Abs(f.Geometry.BoundingBox.Top - field.ExpectedBoundingBox.Top) <=
+                        Globals.BoundingBoxVarianceThreshold &&
+                        field.ExpectedBoundingBox.Width + Globals.BoundingBoxVarianceThreshold >=
+                        f.Geometry.BoundingBox.Width &&
+                        field.ExpectedBoundingBox.Height + Globals.BoundingBoxVarianceThreshold >=
+                        f.Geometry.BoundingBox.Height
+                    ).OrderBy(f => f.Geometry.BoundingBox.Top)
+                    .ThenBy(f => f.Geometry.BoundingBox.Left)
+                    .Select(f => f.Text)
+                    .ToArray();
+
+                if (matchingLines.Length > 0)
+                {
+                    if (string.IsNullOrEmpty(field.RegexExpression))
+                    {
+                        returnVal[field.Name] = string.Join(" ", matchingLines);
+                    }
+                    else
+                    {
+                        var regex = new Regex(field.RegexExpression, RegexOptions.IgnoreCase);
+
+                        var matchLine = matchingLines.FirstOrDefault(a => regex.IsMatch(a));
+
+                        if (matchLine != null)
+                            returnVal[field.Name] = matchLine;
+                    }
+                }
+            }
+            else
+            {
+                // Use tesseract
+                var croppedImage = await Imaging.CloneCropImage(image,
+                    Convert.ToSingle(field.ExpectedBoundingBox.Left),
+                    Convert.ToSingle(field.ExpectedBoundingBox.Top),
+                    Convert.ToSingle(field.ExpectedBoundingBox.Width),
+                    Convert.ToSingle(field.ExpectedBoundingBox.Height));
+
+                if (!Globals.IsRunningOnLambda) await croppedImage.SaveAsPngAsync($"thai-{field.Name}.png");
+                using (var ms = new MemoryStream())
+                {
+                    await croppedImage.SaveAsPngAsync(ms);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    var response = await Tesseract.CallTesseractApi(ms, "field.png");
+                    if (!string.IsNullOrEmpty(response.result))
+                        returnVal.Add(field.Name, response.result);
+                }
+            }
+
+        AWSXRayRecorder.Instance.EndSubsegment();
+
+        return returnVal;
+    }
+
     private string GenderPrefixMatcher(string thaiName)
     {
-        if (thaiName.StartsWith("ด.ญ.") || thaiName.StartsWith("นาง") || thaiName.StartsWith("น.ส."))
+        if (thaiName.StartsWith("ด.ญ.") || thaiName.StartsWith("นาง") || thaiName.StartsWith("น.ส.") ||
+            thaiName.StartsWith(".น.ส."))
             return "Female";
         if (thaiName.StartsWith("นาย") || thaiName.StartsWith("ด.ช.") || thaiName.StartsWith("พระสงฆ์") ||
             thaiName.StartsWith("บาทหลวง"))
@@ -265,24 +405,5 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
         });
 
         return response.IdentityDocuments.FirstOrDefault()?.IdentityDocumentFields ?? new List<IdentityDocumentField>();
-    }
-
-    private async Task LoadBlocks(string s3Key)
-    {
-        var response = await _textractClient.AnalyzeDocumentAsync(new AnalyzeDocumentRequest
-            {
-                Document = new Document
-                {
-                    S3Object = new S3Object
-                    {
-                        Bucket = Globals.StorageBucket,
-                        Name = s3Key
-                    }
-                },
-                FeatureTypes = new List<string> { "FORMS" }
-            }
-        );
-
-        Blocks = response.Blocks;
     }
 }

@@ -24,14 +24,14 @@ def card_to_dict(card):
 
 
 def extract_thai_id_front_info(path):
-    reader = PersonalCard(lang="mix")
+    reader = PersonalCard(lang="mix", template_threshold=0.8)
     result = reader.extract_front_info(path)
     print(f'Thai ID front info: {result}')
     return result
 
 
 def extract_thai_id_back_info(path):
-    reader = PersonalCard(lang="mix")
+    reader = PersonalCard(lang="mix", template_threshold=0.8)
     result = reader.extract_back_info(path)
     print(f'Thai ID back info: {result}')
     return result

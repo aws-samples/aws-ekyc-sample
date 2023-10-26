@@ -9,6 +9,9 @@ using Amazon.S3.Model;
 using Amazon.XRay.Recorder.Core;
 using ekyc_api.DataDefinitions;
 using ekyc_api.DocumentDefinitions;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using BoundingBox = ekyc_api.DataDefinitions.BoundingBox;
@@ -32,16 +35,54 @@ public class Imaging
     public static async Task<Image> CloneCropImage(Image img, float top, float left, float width, float height)
     {
         var newImg = img.Clone(a => a.Resize(img.Width, img.Height));
-        newImg.Mutate(i =>
-        {
-            i.Crop(new Rectangle(Convert.ToInt32(
-                    left * Convert.ToSingle(img.Width)),
-                Convert.ToInt32(top * Convert.ToSingle(img.Height)),
-                Convert.ToInt32(width * Convert.ToSingle(img.Width)),
-                Convert.ToInt32(height * Convert.ToSingle(img.Height))));
-        });
+        var x = Convert.ToInt32(left * Convert.ToSingle(newImg.Width));
+        var y = Convert.ToInt32(top * Convert.ToSingle(newImg.Height));
+        var widthAbs = Convert.ToInt32(width * Convert.ToSingle(newImg.Width));
+        if (widthAbs + x > img.Width)
+            widthAbs = img.Width - x;
+        var heightAbs = Convert.ToInt32(height * Convert.ToSingle(newImg.Height));
+        if (heightAbs + y > img.Height)
+            heightAbs = img.Height - y;
+        newImg.Mutate(i => { i.Crop(new Rectangle(x, y, widthAbs, heightAbs)); });
 
         return newImg;
+    }
+
+    public static async Task<string> CorrectBluriness(string inputImagePath, string outputImagePath)
+    {
+        using var image = new UMat(inputImagePath, ImreadModes.Color);
+        var laplacian = new UMat();
+        CvInvoke.Laplacian(image, laplacian, DepthType.Cv64F);
+
+        var mean = new MCvScalar();
+        var stdDev = new MCvScalar();
+        CvInvoke.MeanStdDev(laplacian, ref mean, ref stdDev);
+
+        var focusMeasure = stdDev.V0 * stdDev.V0;
+
+        // Adjust this threshold value as required.
+        var focusThreshold = 100.0;
+
+        if (focusMeasure < focusThreshold)
+        {
+            // Image is considered blurry
+            Console.WriteLine("Image is blurry. Attempting to sharpen...");
+
+            var kernel = new UMat(3, 3, DepthType.Cv32F, 1);
+            kernel.SetTo(new float[]
+            {
+                -1, -1, -1,
+                -1, 9, -1,
+                -1, -1, -1
+            });
+
+            CvInvoke.Filter2D(image, image, kernel, new System.Drawing.Point(-1, -1));
+            image.Save(outputImagePath);
+            Console.WriteLine($"Image saved to: {outputImagePath}");
+            return outputImagePath;
+        }
+
+        return inputImagePath;
     }
 
     public static double ConvertRadiansToDegrees(double radians)
@@ -49,6 +90,68 @@ public class Imaging
         var degrees = 180 / Math.PI * radians;
         return degrees;
     }
+
+    public static async Task<string> CropDocumentByLabel(string S3Key, string rekognitionLabel)
+    {
+        var _amazonS3 = new AmazonS3Client();
+        var _rekognition = new AmazonRekognitionClient();
+
+        var getObjectResponse = await _amazonS3.GetObjectAsync(new GetObjectRequest
+        {
+            BucketName = Globals.StorageBucket,
+            Key = S3Key
+        });
+
+        var originalImage = Image.Load(getObjectResponse.ResponseStream);
+
+        var detectLabelsResponse = await _rekognition.DetectLabelsAsync(new DetectLabelsRequest
+        {
+            Image = new Amazon.Rekognition.Model.Image
+            {
+                S3Object = new S3Object
+                {
+                    Bucket = Globals.StorageBucket,
+                    Name = S3Key
+                }
+            },
+            MinConfidence = Convert.ToSingle(Globals.GetMinimumConfidence())
+        });
+
+
+        var matchingLabel = detectLabelsResponse.Labels
+            .Where(a => a.Name.ToLower() == rekognitionLabel.ToLower())
+            .SelectMany(a => a.Instances).MaxBy(a => a.BoundingBox.Height + a.BoundingBox.Width);
+
+        if (matchingLabel == null)
+        {
+            Console.WriteLine(
+                $"No label {rekognitionLabel} found in image, cannot crop. Returning original image key.");
+            return S3Key;
+        }
+
+        // Crop the image and upload to S3
+        originalImage.Mutate(i =>
+        {
+            i.Crop(new Rectangle(Convert.ToInt32(
+                    matchingLabel.BoundingBox.Left * Convert.ToSingle(originalImage.Width)),
+                Convert.ToInt32(matchingLabel.BoundingBox.Top * Convert.ToSingle(originalImage.Height)),
+                Convert.ToInt32(matchingLabel.BoundingBox.Width * Convert.ToSingle(originalImage.Width)),
+                Convert.ToInt32(matchingLabel.BoundingBox.Height * Convert.ToSingle(originalImage.Height))));
+        });
+
+        var outStream = new MemoryStream();
+        await originalImage.SaveAsPngAsync(outStream);
+        outStream.Seek(0, SeekOrigin.Begin);
+        var newKey = "cropped/" + Guid.NewGuid() + "/image.png";
+
+        await _amazonS3.PutObjectAsync(new PutObjectRequest
+            { InputStream = outStream, BucketName = Globals.StorageBucket, Key = newKey });
+
+        if (!Globals.IsRunningOnLambda) await originalImage.SaveAsPngAsync("cropped.png");
+
+        return newKey;
+    }
+
 
     public static async Task<string> CropDocument(string S3Key, string RekognitionCustomLabelsProjectArn,
         DocumentTypes documentType)

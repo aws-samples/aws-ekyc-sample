@@ -12,39 +12,40 @@
         <FileVersion>0.1.0</FileVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Amazon.AspNetCore.Identity.Cognito" Version="3.0.0" />
-        <PackageReference Include="Amazon.CDK.AWS.SNS" Version="1.131.0" />
-        <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="6.0.3" />
-        <PackageReference Include="Amazon.Lambda.Logging.AspNetCore" Version="3.1.0" />
-        <PackageReference Include="AWS.Logger.AspNetCore" Version="3.4.0" />
-        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.201.7" />
-        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.7" />
-        <PackageReference Include="AWSSDK.Lambda" Version="3.7.201.40" />
-        <PackageReference Include="AWSSDK.Rekognition" Version="3.7.200.36" />
-        <PackageReference Include="AWSSDK.S3" Version="3.7.203.11" />
-        <PackageReference Include="AWSSDK.SageMaker" Version="3.7.21.10" />
-        <PackageReference Include="AWSSDK.SageMakerRuntime" Version="3.7.1.51" />
-        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.200.36" />
-        <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.200.36" />
-        <PackageReference Include="AWSSDK.Textract" Version="3.7.200.36" />
-        <PackageReference Include="AWSSDK.XRay" Version="3.7.201.4" />
-        <PackageReference Include="AWSXRayRecorder.Handlers.AspNetCore" Version="2.11.0" />
-        <PackageReference Include="AWSXRayRecorder.Handlers.AwsSdk" Version="2.12.0" />
-        <PackageReference Include="CsvHelper" Version="27.1.1" />
-        <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.18" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.21" />
-        <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-        <PackageReference Include="RestSharp" Version="110.2.0" />
-        <PackageReference Include="SixLabors.Fonts" Version="1.0.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
-        <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+        <PackageReference Include="Amazon.AspNetCore.Identity.Cognito" Version="3.0.0"/>
+        <PackageReference Include="Amazon.CDK.AWS.SNS" Version="1.131.0"/>
+        <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="6.0.3"/>
+        <PackageReference Include="Amazon.Lambda.Logging.AspNetCore" Version="3.1.0"/>
+        <PackageReference Include="AWS.Logger.AspNetCore" Version="3.4.0"/>
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.201.7"/>
+        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.7"/>
+        <PackageReference Include="AWSSDK.Lambda" Version="3.7.201.40"/>
+        <PackageReference Include="AWSSDK.Rekognition" Version="3.7.200.36"/>
+        <PackageReference Include="AWSSDK.S3" Version="3.7.203.11"/>
+        <PackageReference Include="AWSSDK.SageMaker" Version="3.7.21.10"/>
+        <PackageReference Include="AWSSDK.SageMakerRuntime" Version="3.7.1.51"/>
+        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.200.36"/>
+        <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.200.36"/>
+        <PackageReference Include="AWSSDK.Textract" Version="3.7.200.36"/>
+        <PackageReference Include="AWSSDK.XRay" Version="3.7.201.4"/>
+        <PackageReference Include="AWSXRayRecorder.Handlers.AspNetCore" Version="2.11.0"/>
+        <PackageReference Include="AWSXRayRecorder.Handlers.AwsSdk" Version="2.12.0"/>
+        <PackageReference Include="CsvHelper" Version="27.1.1"/>
+        <PackageReference Include="Emgu.CV" Version="4.8.0.5324"/>
+        <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.1.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.18"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.21"/>
+        <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
+        <PackageReference Include="RestSharp" Version="110.2.0"/>
+        <PackageReference Include="SixLabors.Fonts" Version="1.0.0"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2"/>
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5"/>
+        <PackageReference Include="System.ValueTuple" Version="4.5.0"/>
     </ItemGroup>
     <ItemGroup>
-        <None Remove="DocumentDefinitions\MY-NRIC\postcodes.csv" />
+        <None Remove="DocumentDefinitions\MY-NRIC\postcodes.csv"/>
         <Content Include="DocumentDefinitions\MY-NRIC\postcodes.csv">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
@@ -54,16 +55,16 @@
         <Content Update="DocumentDefinitions\documentdefinitions.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <None Remove="DocumentDefinitions\textract.sh" />
+        <None Remove="DocumentDefinitions\textract.sh"/>
         <Content Include="DocumentDefinitions\textract.sh">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <None Remove="Dockerfile" />
+        <None Remove="Dockerfile"/>
         <Content Include="Dockerfile">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <Compile Remove="Utils\FieldCoordinateMapping.cs" />
+        <Compile Remove="Utils\FieldCoordinateMapping.cs"/>
     </ItemGroup>
 </Project>

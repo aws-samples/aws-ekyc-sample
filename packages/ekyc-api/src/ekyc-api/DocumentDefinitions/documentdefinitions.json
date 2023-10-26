@@ -122,12 +122,12 @@
       "Landmarks": [],
       "DataFields": [
         {
-          "Name": "Thai Name",
+          "Name": "Thai Address",
           "ExpectedBoundingBox": {
-            "Left": 0.264,
-            "Width": 0.632,
-            "Top": 0.2,
-            "Height": 0.071
+            "Left": 0.105,
+            "Width": 0.609,
+            "Top": 0.61,
+            "Height": 0.149
           },
           "Language": "th"
         },

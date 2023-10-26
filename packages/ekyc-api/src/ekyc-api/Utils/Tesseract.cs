@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Amazon.XRay.Recorder.Core;
@@ -77,6 +79,18 @@ public class TesseractThaiIdFrontResponse
     public string PrefixEN { get; set; }
     public string PrefixTH { get; set; }
     public string Religion { get; set; }
+
+    public Dictionary<string, string> ToDictionary()
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var prop in GetType().GetProperties())
+        {
+            var value = prop.GetValue(this) as string;
+            if (!string.IsNullOrEmpty(value)) result[prop.Name] = value;
+        }
+
+        return result;
+    }
 }
 
 public class TesseractResponse

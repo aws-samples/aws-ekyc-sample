@@ -20,6 +20,7 @@ public class Thai_ID_Front_DocumentDefinition : DocumentDefinitionBase
 {
     private readonly IAmazonS3 _amazonS3;
     private readonly IConfiguration _config;
+    private readonly IDocumentDefinitionFactory _definitionFactory;
     private readonly ILogger<PRC_Passport_DocumentDefinition> _logger;
     private readonly IAmazonRekognition _rekognition;
     private readonly IAmazonTextract _textract;
@@ -27,12 +28,14 @@ public class Thai_ID_Front_DocumentDefinition : DocumentDefinitionBase
     public Thai_ID_Front_DocumentDefinition(IConfiguration config,
         IAmazonRekognition rekognition, IAmazonS3 s3,
         ILogger<Thai_ID_Front_DocumentDefinition> logger,
+        IDocumentDefinitionFactory definitionFactory,
         IAmazonTextract textract) :
         base(config, rekognition, s3, textract)
     {
         _config = config;
         _rekognition = rekognition;
         _amazonS3 = s3;
+        _definitionFactory = definitionFactory;
         _textract = textract;
     }
 
@@ -113,7 +116,8 @@ public class Thai_ID_Front_DocumentDefinition : DocumentDefinitionBase
 
     public override async Task<Dictionary<string, string>> GetFieldData(string S3Key, DocumentTypes docType)
     {
-        var extractor = new Thai_ID_Front_TextractFieldValueExtractor(_s3, _textract, _config, _logger);
+        var extractor =
+            new Thai_ID_Front_TextractFieldValueExtractor(_s3, _textract, _definitionFactory, _config, _logger);
 
         return await extractor.GetFieldValues(S3Key, RekognitionCustomLabelsProjectArn, docType);
     }

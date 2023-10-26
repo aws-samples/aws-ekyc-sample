@@ -16,7 +16,7 @@ public class Globals
     public static string ThaiIdRekognitionCustomLabelsProjectArn =
         "arn:aws:rekognition:ap-southeast-1:886995061454:project/thai-id-landmarks/version/thai-id-landmarks.2023-09-11T11.36.51/1694396211317";
 
-    public static bool IsRunningOnLambda => Environment.GetEnvironmentVariable("LAMBDA_TASK_ROOT") != null;
+    public static bool IsRunningOnLambda => Environment.GetEnvironmentVariable("AWS_LAMBDA_FUNCTION_NAME") != null;
 
     public static double BoundingBoxVarianceThreshold => 0.05d;
 
