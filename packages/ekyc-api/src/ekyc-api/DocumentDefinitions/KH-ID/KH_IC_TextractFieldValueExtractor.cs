@@ -1,92 +1,92 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Amazon.Textract;
 using Amazon.Textract.Model;
 using Amazon.XRay.Recorder.Core;
+using ekyc_api.DataDefinitions;
 using ekyc_api.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace ekyc_api.DocumentDefinitions.KH_ID
+namespace ekyc_api.DocumentDefinitions.KH_ID;
+
+public class KH_IC_TextractFieldValueExtractor : IFieldValueExtractor
 {
-    public class KH_IC_TextractFieldValueExtractor : IFieldValueExtractor
+    private readonly IConfiguration _config;
+    private readonly ILogger _logger;
+
+    private readonly IAmazonTextract _textractClient;
+
+    private List<Block> Blocks;
+
+    public KH_IC_TextractFieldValueExtractor(IAmazonTextract textractClient, IConfiguration config,
+        ILogger logger)
     {
-        private readonly IConfiguration _config;
-        private readonly ILogger _logger;
+        _config = config;
+        _logger = logger;
+        _textractClient = textractClient;
+    }
 
-        private readonly IAmazonTextract _textractClient;
+    public async Task<Dictionary<string, string>> GetFieldValues(string s3Key, string RekognitionCustomLabelsProjectArn,
+        DocumentTypes documentType)
+    {
+        AWSXRayRecorder.Instance.BeginSubsegment("KH_IC_TextractFieldValueExtractor::GetFieldValues");
 
-        private List<Block> Blocks;
+        await LoadBlocks(s3Key);
 
-        public KH_IC_TextractFieldValueExtractor(IAmazonTextract textractClient, IConfiguration config,
-            ILogger logger)
-        {
-            _config = config;
-            _logger = logger;
-            _textractClient = textractClient;
-        }
+        var regex = new Regex(@"^\d{9}$");
 
-        public async Task<Dictionary<string, string>> GetFieldValues(string s3Key)
-        {
-            AWSXRayRecorder.Instance.BeginSubsegment("KH_IC_TextractFieldValueExtractor::GetFieldValues");
+        var idBlock = Blocks.FirstOrDefault(a =>
+            a.Confidence > Globals.GetMinimumConfidence() && !string.IsNullOrEmpty(a.Text) &&
+            regex.IsMatch(a.Text));
 
-            await LoadBlocks(s3Key);
+        if (idBlock == null)
+            throw new Exception("Unable to find ID on card.");
 
-            var regex = new Regex(@"^\d{9}$");
+        var dict = new Dictionary<string, string>();
 
-            var idBlock = Blocks.FirstOrDefault(a =>
-                a.Confidence > Globals.GetMinimumConfidence() && !string.IsNullOrEmpty(a.Text) &&
-                regex.IsMatch(a.Text));
+        dict["Id"] = idBlock.Text;
 
-            if (idBlock == null)
-                throw new Exception("Unable to find ID on card.");
+        regex = new Regex(@"^[a-zA-Z\s]+$");
 
-            var dict = new Dictionary<string, string>();
+        var nameBlock = Blocks.FirstOrDefault(a => a.Confidence > Globals.GetMinimumConfidence()
+                                                   && a.Geometry.BoundingBox.Top < 0.5f
+                                                   && !string.IsNullOrEmpty(a.Text)
+                                                   && regex.IsMatch(a.Text));
 
-            dict["Id"] = idBlock.Text;
+        if (nameBlock == null)
+            throw new Exception("Unable to find name on card.");
 
-            regex = new Regex(@"^[a-zA-Z\s]+$");
+        dict["Name"] = nameBlock.Text;
 
-            var nameBlock = Blocks.FirstOrDefault(a => a.Confidence > Globals.GetMinimumConfidence()
-                                                       && a.Geometry.BoundingBox.Top < 0.5f
-                                                       && !string.IsNullOrEmpty(a.Text)
-                                                       && regex.IsMatch(a.Text));
+        AWSXRayRecorder.Instance.EndSubsegment();
 
-            if (nameBlock == null)
-                throw new Exception("Unable to find name on card.");
+        return dict;
+    }
 
-            dict["Name"] = nameBlock.Text;
+    private async Task LoadBlocks(string s3Key)
+    {
+        AWSXRayRecorder.Instance.BeginSubsegment("KH_IC_TextractFieldValueExtractor::LoadBlocks");
 
-            AWSXRayRecorder.Instance.EndSubsegment();
-
-            return dict;
-        }
-
-        private async Task LoadBlocks(string s3Key)
-        {
-            AWSXRayRecorder.Instance.BeginSubsegment("KH_IC_TextractFieldValueExtractor::LoadBlocks");
-
-            var response = await _textractClient.AnalyzeDocumentAsync(new AnalyzeDocumentRequest
+        var response = await _textractClient.AnalyzeDocumentAsync(new AnalyzeDocumentRequest
+            {
+                Document = new Document
                 {
-                    Document = new Document
+                    S3Object = new S3Object
                     {
-                        S3Object = new S3Object
-                        {
-                            Bucket = Globals.StorageBucket,
-                            Name = s3Key
-                        }
-                    },
-                    FeatureTypes = new List<string> { "FORMS" }
-                }
-            );
+                        Bucket = Globals.StorageBucket,
+                        Name = s3Key
+                    }
+                },
+                FeatureTypes = new List<string> { "FORMS" }
+            }
+        );
 
-            Blocks = response.Blocks;
+        Blocks = response.Blocks;
 
-            AWSXRayRecorder.Instance.EndSubsegment();
-        }
+        AWSXRayRecorder.Instance.EndSubsegment();
     }
 }

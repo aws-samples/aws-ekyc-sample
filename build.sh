@@ -17,8 +17,16 @@ pushd packages/ui
 yarn
 rm -rf build
 yarn run build
+popd
+#### Build the User Interface v2
+pushd packages/webv2
+yarn
+rm -rf build
+yarn run build
+popd
 #### Build the CDK stack
 pushd infra
 yarn
 rm -rf output
 cdk synth --all -o output
+popd

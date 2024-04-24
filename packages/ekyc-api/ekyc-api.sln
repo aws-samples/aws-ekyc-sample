@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckRekognitionProject.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckRekognitionProject", "..\lambdas\CheckRekognitionProject\src\CheckRekognitionProject\CheckRekognitionProject.csproj", "{059E6757-D99E-43FF-9E68-989C2C85E34C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnvironmentVariablesWriter", "..\EnvironmentVariablesWriter\EnvironmentVariablesWriter.csproj", "{EAA0425E-2D68-4ADA-A09A-E4764C025BEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{059E6757-D99E-43FF-9E68-989C2C85E34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{059E6757-D99E-43FF-9E68-989C2C85E34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{059E6757-D99E-43FF-9E68-989C2C85E34C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAA0425E-2D68-4ADA-A09A-E4764C025BEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAA0425E-2D68-4ADA-A09A-E4764C025BEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAA0425E-2D68-4ADA-A09A-E4764C025BEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAA0425E-2D68-4ADA-A09A-E4764C025BEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{44092CBD-E2F8-488B-9D0A-BB940B985DC0} = {F63D5A24-1311-4E70-8B1A-493861A84915}

@@ -1,15 +1,16 @@
 import * as cognito from "aws-cdk-lib/aws-cognito";
-import {CfnUserPoolGroup, OAuthScope, UserPoolClientIdentityProvider} from "aws-cdk-lib/aws-cognito";
+import {CfnIdentityPool, CfnUserPoolGroup} from "aws-cdk-lib/aws-cognito";
 import * as cdk from "aws-cdk-lib/core";
 import * as iam from 'aws-cdk-lib/aws-iam'
+import {Effect, Policy, PolicyDocument, PolicyStatement, Role, ServicePrincipal} from 'aws-cdk-lib/aws-iam'
 import * as s3 from 'aws-cdk-lib/aws-s3'
-
-import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import {Construct} from "constructs";
+import {CfnOutput} from "aws-cdk-lib";
+import {CfnWorkteam} from "aws-cdk-lib/aws-sagemaker";
 
 interface IdentityConstructProps {
-    cfJsWebApp: cloudfront.CloudFrontWebDistribution
     trainingBucket: s3.Bucket
+    storageBucket: s3.Bucket
 }
 
 export class IdentityConstructs extends Construct {
@@ -17,15 +18,17 @@ export class IdentityConstructs extends Construct {
 
     public readonly userPoolClient: cognito.UserPoolClient;
 
-   public readonly userPoolDomain: cognito.UserPoolDomain
+    public readonly userPoolDomain: cognito.UserPoolDomain
 
-    public readonly identityPool: cognito.CfnIdentityPool
-
+    public readonly identityPool: CfnIdentityPool;
     public readonly labellersGroup: cognito.CfnUserPoolGroup
 
-    public readonly labellersClient: cognito.UserPoolClient
-
+    public readonly rekognitionRole: iam.Role
     public readonly groundTruthRole: iam.Role
+
+    public readonly ecsRole: iam.Role
+
+    public readonly workteam: CfnWorkteam
 
 
     constructor(scope: Construct, id: string, props: IdentityConstructProps) {
@@ -67,61 +70,29 @@ export class IdentityConstructs extends Construct {
             removalPolicy: cdk.RemovalPolicy.DESTROY,
         });
 
-        const standardCognitoAttributes = {
-            givenName: true,
-            familyName: true,
-            email: true,
-            emailVerified: true,
-            address: true,
-            birthdate: true,
-            gender: true,
-            locale: true,
-            middleName: true,
-            fullname: true,
-            nickname: true,
-            phoneNumber: true,
-            phoneNumberVerified: true,
-            profilePicture: true,
-            preferredUsername: true,
-            profilePage: true,
-            timezone: true,
-            lastUpdateTime: true,
-            website: true,
-        };
-
-        const clientReadAttributes = new cognito.ClientAttributes()
-            .withStandardAttributes(standardCognitoAttributes)
-            .withCustomAttributes(...["country", "city", "isAdmin"]);
-
-        const clientWriteAttributes = new cognito.ClientAttributes()
-            .withStandardAttributes({
-                ...standardCognitoAttributes,
-                emailVerified: false,
-                phoneNumberVerified: false,
-            })
-            .withCustomAttributes(...["country", "city"]);
-
         //  User Pool Client
-        this.userPoolClient = this.userPool.addClient( "userpool-client", {
+        this.userPoolClient = this.userPool.addClient("userpool-client", {
             authFlows: {
                 adminUserPassword: true,
                 custom: true,
                 userSrp: true,
                 userPassword: true
             },
-            disableOAuth: false,
-            readAttributes: clientReadAttributes,
-            writeAttributes: clientWriteAttributes,
-            generateSecret: false,
             oAuth: {
-                flows: {authorizationCodeGrant: true, implicitCodeGrant: true, clientCredentials: false},
-                scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.COGNITO_ADMIN],
-                callbackUrls: [`https://${props.cfJsWebApp.distributionDomainName}`]
+                callbackUrls: ['http://localhost:3000'],  // Replace with your callback URL
+                flows: {
+                    authorizationCodeGrant: true,
+                },
+                scopes: [
+                    cognito.OAuthScope.OPENID,
+                    cognito.OAuthScope.EMAIL,
+                    cognito.OAuthScope.PROFILE,
+                ],
             },
-            supportedIdentityProviders: [
-                UserPoolClientIdentityProvider.COGNITO,
-            ]
+            generateSecret: false,
+            userPoolClientName: "web-client"
         });
+
 
         this.userPoolDomain = this.userPool.addDomain(`userpool-domain-${this.node.addr}`, {
             cognitoDomain: {
@@ -129,24 +100,66 @@ export class IdentityConstructs extends Construct {
             }
         })
 
-        this.labellersClient = this.userPool.addClient("labellers-client", {
-            authFlows: {
-                adminUserPassword: true,
-                custom: true,
-                userSrp: true,
-            },
-            disableOAuth: false,
-            readAttributes: clientReadAttributes,
-            writeAttributes: clientWriteAttributes,
-            generateSecret: true,
-            supportedIdentityProviders: [
-                UserPoolClientIdentityProvider.COGNITO,
+        this.identityPool = new CfnIdentityPool(this, `IdentityPool`, {
+            allowUnauthenticatedIdentities: false,
+            cognitoIdentityProviders: [
+                {
+                    clientId: this.userPoolClient.userPoolClientId,
+                    providerName: this.userPool.userPoolProviderName,
+                },
             ],
-            oAuth: {
-                flows: {authorizationCodeGrant: true, implicitCodeGrant: true, clientCredentials: false},
-                scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.COGNITO_ADMIN],
-                callbackUrls: [`https://${props.cfJsWebApp.distributionDomainName}`]
-            },
+        });
+
+        // Create an authenticated role with some policy (modify as needed)
+        const authenticatedRole = new iam.Role(this, 'CognitoDefaultAuthenticatedRole', {
+            assumedBy: new iam.FederatedPrincipal(
+                'cognito-identity.amazonaws.com',
+                {
+                    "StringEquals": {
+                        "cognito-identity.amazonaws.com:aud": this.identityPool.ref
+                    },
+                    "ForAnyValue:StringLike": {
+                        "cognito-identity.amazonaws.com:amr": "authenticated"
+                    },
+                },
+                "sts:AssumeRoleWithWebIdentity"
+            )
+        });
+
+        authenticatedRole.addToPrincipalPolicy(new iam.PolicyStatement({
+            resources: [
+                `arn:aws:s3:::${props.storageBucket.bucketName}`,
+                `arn:aws:s3:::${props.storageBucket.bucketName}/*`,
+                `arn:aws:s3:::ekyc-liveness-check`,
+                `arn:aws:s3:::ekyc-liveness-check/*`,
+            ],
+            actions: [
+                "s3:AbortMultipartUpload",
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation"
+            ],
+        }))
+
+        authenticatedRole.addToPrincipalPolicy(new iam.PolicyStatement({
+            resources: ["*"],
+            actions: [
+                "rekognition:*"
+            ],
+        }))
+
+        // Attach any policies you want the authenticated users to have
+        // For example, giving them read access to a certain S3 bucket:
+        // const bucket = new s3.Bucket(this, 'MyBucket');
+        // bucket.grantRead(authenticatedRole);
+
+        // Add the role to the identity pool
+        new cognito.CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+            identityPoolId: this.identityPool.ref,
+            roles: {
+                'authenticated': authenticatedRole.roleArn
+            }
         });
 
 
@@ -189,6 +202,28 @@ export class IdentityConstructs extends Construct {
             })
         );
 
+        this.rekognitionRole = new iam.Role(this, 'RekognitionRole', {
+            assumedBy: new iam.ServicePrincipal('rekognition.amazonaws.com'),
+        })
+
+        this.rekognitionRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                resources: [
+                    `arn:aws:s3:::${props.storageBucket.bucketName}`,
+                    `arn:aws:s3:::${props.storageBucket.bucketName}/*`,
+                    `arn:aws:s3:::ekyc-liveness-check`,
+                    `arn:aws:s3:::ekyc-liveness-check/*`,
+                ],
+                actions: [
+                    "s3:AbortMultipartUpload",
+                    "s3:GetObject",
+                    "s3:PutObject",
+                    "s3:ListBucket",
+                    "s3:GetBucketLocation"
+                ],
+            })
+        );
+
 
         this.labellersGroup = new CfnUserPoolGroup(this, 'labellers-userpool-group', {
             userPoolId: this.userPool.userPoolId,
@@ -197,8 +232,80 @@ export class IdentityConstructs extends Construct {
             description: 'Group of labellers of Ground Truth images'
         })
 
+        // Create an inline policy document to replicate the AmazonECSTaskExecutionRolePolicy
+        const ecsPolicyDoc = new PolicyDocument({
+            statements: [
+                // Allow ECS tasks to pull images from ECR
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: ["ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage", "ecr:BatchCheckLayerAvailability"],
+                    resources: ["*"],
+                }),
+                // Allow ECS tasks to send logs to CloudWatch
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: ["logs:CreateLogStream", "logs:PutLogEvents", "logs:CreateLogGroup"],
+                    resources: ["arn:aws:logs:*:*:log-group:/ecs/*"],
+                }),
+                // Allow ECS tasks to describe the EC2 instances in the cluster
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: ["ec2:Describe*", "rekognition:*", "sagemaker:*"],
+                    resources: ["*"],
+                }),
+                // Allow ECS tasks to access the Task Metadata Endpoint
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: [
+                        "ecs:CreateCluster",
+                        "ecs:DeregisterContainerInstance",
+                        "ecs:DiscoverPollEndpoint",
+                        "ecs:Poll",
+                        "ecs:RegisterContainerInstance",
+                        "ecs:StartTelemetrySession",
+                        "ecs:Submit*",
+                        "ecs:StartTask",
+                        "ecs:StopTask",
+                        "ecs:UpdateContainerInstancesState",
+                        "ecs:UpdateService",
+                    ],
+                    resources: ["*"],
+                }),
+                // Allow ECS tasks to create and delete temporary files
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: [
+                        "s3:CreateBucket",
+                        "s3:DeleteBucket",
+                        "s3:DeleteObject",
+                        "s3:GetBucketLocation",
+                        "s3:GetObject",
+                        "s3:ListBucket",
+                        "s3:PutObject",
+                    ],
+                    resources: ["arn:aws:s3:::codepipeline-*"],
+                }),
+            ],
+        });
+
+        this.ecsRole = new Role(this, "EcsExecutionRole", {
+            assumedBy: new ServicePrincipal("ecs-tasks.amazonaws.com"),
+        });
+
+        const ecsRolePolicy = new Policy(this, "ecs-policy", {
+            document: ecsPolicyDoc,
+        });
+
+        this.ecsRole.attachInlinePolicy(ecsRolePolicy);
+
 
         // Output
+
+        new CfnOutput(this, "ecsRoleArn", {
+            value: this.ecsRole.roleArn,
+            description: "ECS Role Arn",
+            exportName: `ekyc-ecsRoleArn`,
+        });
 
         new cdk.CfnOutput(this, "UserPool", {
             value: this.userPool.userPoolId,
@@ -212,13 +319,7 @@ export class IdentityConstructs extends Construct {
             exportName: "userPoolClientId",
         });
 
-        new cdk.CfnOutput(this, "LabellersPoolClientId", {
-            value: this.labellersClient.userPoolClientId,
-            description: "Labellers pool client Id",
-            exportName: "labellersPoolClientId",
-        });
-
-       new cdk.CfnOutput(this, "UserPoolDomain", {
+        new cdk.CfnOutput(this, "UserPoolDomain", {
             value: this.userPoolDomain.domainName,
             description: "User pool domain",
             exportName: "userPoolDomain",

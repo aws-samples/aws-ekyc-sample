@@ -14,7 +14,6 @@ permissions and limitations under the License.
  */
 
 import ekycApiConstruct from "../resources/api";
-import StorageConstruct, * as storage from "../resources/storage";
 import {IdentityConstructs} from "../resources/identity";
 import WebAppConstruct from "../resources/webapp"
 import {ParamStoreConstruct} from "../resources/param-store";
@@ -23,6 +22,11 @@ import WorkteamConstruct from "../resources/workteam";
 import EventConstructs from "../resources/events";
 import {CfnOutput, Stack, StackProps} from "aws-cdk-lib";
 import {Construct} from "constructs";
+import {TrainingWorkflowConstruct} from "../resources/trainingworkflow";
+import StorageConstruct from "../resources/storage";
+import {NetworkConstruct} from "../resources/network";
+import {OCR_SERVICE_PORT, OcrServiceConstruct} from "../resources/ocr-service";
+
 
 export class EkycInfraStack extends Stack {
 
@@ -33,30 +37,47 @@ export class EkycInfraStack extends Stack {
 
         // The code that defines your stack goes here
 
+        const network = new NetworkConstruct(this, "network")
+
         const storage = new StorageConstruct(this, "storage");
 
-        const jsWebApp = new WebAppConstruct(this, "js-web-app", {
-            webBucket: storage.webBucket
-        })
+        //  const network = new NetworkConstruct(this, `network`)
 
         const identity = new IdentityConstructs(this, "identity", {
-            cfJsWebApp: jsWebApp.cfWeb,
-            trainingBucket: storage.trainingBucket
+            trainingBucket: storage.trainingBucket,
+            storageBucket: storage.storageBucket,
         })
+
 
         const topics = new SnsConstruct(this, 'topics', {groundTruthRole: identity.groundTruthRole})
 
         const workteams = new WorkteamConstruct(this, "workteams", {
-            cognitoUserPool: identity.userPool,
-            cognitoAppClient: identity.labellersClient,
             labellersTopic: topics.labellersTopic,
-            labellersGroup: identity.labellersGroup,
             trainingBucket: storage.trainingBucket
+        })
+
+        new TrainingWorkflowConstruct(this, 'trainingworkflow', {
+            StorageBucket: storage.storageBucket,
+            cognitoClient: identity.userPoolClient,
+            cognitoUserPool: identity.userPool,
+            workteamName: workteams.labellersWorkTeam.attrWorkteamName,
+            vpc: network.vpc
         })
 
         const param_store = new ParamStoreConstruct(this, "parameters")
 
-         new ekycApiConstruct(this, "ekyc-api", {
+        const ocrService = new OcrServiceConstruct(this, 'ocr-lambda', {
+            storageBucket: storage.storageBucket,
+            vpc: network.vpc,
+            ecsRole: identity.ecsRole
+        })
+        // const ocrService = new OcrServiceConstruct(this, 'ocr-service', {
+        //     vpc: network.vpc,
+        //     ecsRole: identity.ecsRole
+        // })
+
+        const api = new ekycApiConstruct(this, "ekyc-api", {
+            vpc: network.vpc,
             trainingTable: storage.trainingTable,
             storageBucket: storage.storageBucket,
             trainingBucket: storage.trainingBucket,
@@ -66,27 +87,46 @@ export class EkycInfraStack extends Stack {
             cognitoAppClient: identity.userPoolClient,
             dataRequestsTable: storage.dataRequestsTable,
             approvalsTopic: topics.approvalTopic,
-            RekognitionCustomLabelsProjectArnParameter:param_store.rekognitionCustomLabelsProjectArn,
+            RekognitionCustomLabelsProjectArnParameter: param_store.rekognitionCustomLabelsProjectArn,
             RekognitionCustomLabelsProjectVersionArnParameter: param_store.rekognitionCustomLabelsProjectVersionArn,
-            jsCloudFrontDistribution: jsWebApp.cfWeb,
             workTeam: workteams.labellersWorkTeam,
             groundTruthRole: identity.groundTruthRole,
-            useFieldCoordinatesExtractionMethodParameter:param_store.useFieldCoordinatesExtractionMethod
+            useFieldCoordinatesExtractionMethodParameter: param_store.useFieldCoordinatesExtractionMethod,
+            ocrServiceEndpoint: `http://${ocrService.ecsService.loadBalancer.loadBalancerDnsName}:${OCR_SERVICE_PORT}`
+        })
+
+        new WebAppConstruct(this, "js-web-app", {
+            webBucket: storage.webBucket,
+            userPool: identity.userPool,
+            userPoolClient: identity.userPoolClient,
+            api: api.api,
+            configuration: {
+                outputS3Key: "runtime-config.json",
+                windowProperty: "runtimeConfig",
+                config: {
+                    region: this.region,
+                    apiStage: api.api.url,
+                    userPoolId: identity.userPool.userPoolId,
+                    userPoolWebClientId: identity.userPoolClient.userPoolClientId,
+                    cognitoDomain: identity.userPoolDomain.domainName,
+                    identityPoolId: identity.identityPool.ref,
+                },
+            }
         })
 
 
-       new EventConstructs(this, 'event-triggers',
+        new EventConstructs(this, 'event-triggers',
             {
-                RekognitionCustomLabelsProjectArnParameter:param_store.rekognitionCustomLabelsProjectArn,
+                RekognitionCustomLabelsProjectArnParameter: param_store.rekognitionCustomLabelsProjectArn,
                 RekognitionCustomLabelsProjectVersionArnParameter: param_store.rekognitionCustomLabelsProjectVersionArn,
                 trainingTable: storage.trainingTable,
                 trainingBucket: storage.trainingBucket
             })
 
         new CfnOutput(this, "DeploymentRegion", {
-                value: Stack.of(this).region,
-                description: "The region that this stack has been deployed in.",
-                exportName: "deploymentRegion",
+            value: Stack.of(this).region,
+            description: "The region that this stack has been deployed in.",
+            exportName: "deploymentRegion",
         });
     }
 }

@@ -4,3 +4,5 @@
 packages/PostDeploymentScripts/src/output.json
 
 packages/ekyc-api/output.json
+/testdata/**
+/packages/inference-api/ekyc-inference-api/static/uploads/

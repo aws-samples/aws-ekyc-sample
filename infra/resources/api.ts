@@ -9,11 +9,12 @@ import * as sagemaker from "aws-cdk-lib/aws-sagemaker"
 import * as apigateway from "aws-cdk-lib/aws-apigateway"
 import {ApiKeySourceType, AuthorizationType} from "aws-cdk-lib/aws-apigateway"
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
-import {ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
-import {CloudFrontWebDistribution} from "aws-cdk-lib/aws-cloudfront";
+import {Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {CfnWebACL, CfnWebACLAssociation} from "aws-cdk-lib/aws-wafv2";
 import {Construct} from "constructs";
-import {Arn, CfnOutput, Stack} from "aws-cdk-lib";
+import {Arn, CfnOutput, Duration, Stack} from "aws-cdk-lib";
+import * as path from "path";
+import {Vpc} from "aws-cdk-lib/aws-ec2";
 
 export interface EKYCApiConstructProps {
     readonly storageBucket: s3.Bucket;
@@ -26,15 +27,15 @@ export interface EKYCApiConstructProps {
     readonly approvalsTopic: Topic;
     readonly RekognitionCustomLabelsProjectVersionArnParameter: StringParameter;
     readonly RekognitionCustomLabelsProjectArnParameter: StringParameter;
-    readonly useFieldCoordinatesExtractionMethodParameter :StringParameter,
-    readonly jsCloudFrontDistribution: CloudFrontWebDistribution;
+    readonly useFieldCoordinatesExtractionMethodParameter: StringParameter,
     readonly trainingTable: dynamodb.Table;
     readonly workTeam: sagemaker.CfnWorkteam
     readonly groundTruthRole: Role
+    readonly ocrServiceEndpoint: string
+    readonly vpc: Vpc
 }
 
 export default class EKYCApiConstruct extends Construct {
-    public readonly execRole: Role;
 
     public readonly api: apigateway.LambdaRestApi;
 
@@ -42,15 +43,21 @@ export default class EKYCApiConstruct extends Construct {
 
     constructor(scope: Construct, id: string, props: EKYCApiConstructProps) {
         super(scope, id);
+        const {vpc} = props
 
         const backendFn = new lambda.Function(this, "ekyc-proxy-handler", {
+            vpc: vpc,
+            timeout: Duration.minutes(1),
             runtime: lambda.Runtime.DOTNET_6,
             handler: "ekyc-api::ekyc_api.LambdaEntryPoint::FunctionHandlerAsync",
             code: lambda.Code.fromAsset(
-                "../packages/ekyc-api/src/ekyc-api/bin/Debug/netcoreapp3.1"
+                path.join(__dirname, "../../packages/ekyc-api/src/ekyc-api/bin/Debug/net6.0")
             ),
-            memorySize: 1024,
+            //vpc: props.vpc,
+            memorySize: 4096,
             environment: {
+                //TODO: Make this come from a cross-region stack as Rekognition Liveness check is only available in select regions
+                LivenessBucket: "ekyc-liveness-check",
                 StorageBucket: props.storageBucket.bucketName,
                 SessionTable: props.sessionsTable.tableName,
                 VerificationHistoryTable: props.verificationHistoryTable.tableName,
@@ -60,15 +67,15 @@ export default class EKYCApiConstruct extends Construct {
                 CognitoAppClientId: props.cognitoAppClient.userPoolClientId,
                 DataRequestsTable: props.dataRequestsTable.tableName,
                 ApprovalsSnsTopic: props.approvalsTopic.topicArn,
-                RekognitionCustomLabelsProjectVersionArnParameterName:props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
-                RekognitionCustomLabelsProjectArnParameterName:props.RekognitionCustomLabelsProjectArnParameter.parameterName,
+                RekognitionCustomLabelsProjectVersionArnParameterName: props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
+                RekognitionCustomLabelsProjectArnParameterName: props.RekognitionCustomLabelsProjectArnParameter.parameterName,
                 UseFieldCoordinatesExtractionMethodParameterName: props.useFieldCoordinatesExtractionMethodParameter.parameterName,
-                OriginDistributionDomain: props.jsCloudFrontDistribution.distributionDomainName,
                 TrainingBucket: props.trainingBucket.bucketName,
                 TrainingTableName: props.trainingTable.tableName,
                 GroundTruthRoleArn: props.groundTruthRole.roleArn,
                 GroundTruthWorkTeam: `arn:aws:sagemaker:${Stack.of(this).region}:${Stack.of(this).account}:workteam/private-crowd/${props.workTeam.workteamName}`,
                 GroundTruthUiTemplateS3Uri: `s3://${props.trainingBucket.bucketName}/template/labellers.html`,
+                OcrServiceEndpoint: props.ocrServiceEndpoint
             },
             tracing: Tracing.ACTIVE
         });
@@ -80,15 +87,15 @@ export default class EKYCApiConstruct extends Construct {
         if (lambdaRole) {
 
 
-            permissionUtils.addDynamoDbPermissions(props.sessionsTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.sessionsTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.verificationHistoryTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.verificationHistoryTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.trainingTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.trainingTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable, lambdaRole)
 
-            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable,lambdaRole)
+            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable, lambdaRole)
 
             props.storageBucket.grantReadWrite(lambdaRole);
 
@@ -98,6 +105,7 @@ export default class EKYCApiConstruct extends Construct {
                 new PolicyStatement({
                     resources: [props.approvalsTopic.topicArn],
                     actions: ["sns:Publish"],
+                    effect: Effect.ALLOW
                 })
             );
 
@@ -107,6 +115,33 @@ export default class EKYCApiConstruct extends Construct {
                     actions: ["lambda:InvokeFunction"],
                 })
             );*/
+
+            lambdaRole?.addToPrincipalPolicy(new PolicyStatement({
+                actions: ["ec2:DescribeNetworkInterfaces",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeInstances",
+                    "ec2:AttachNetworkInterface"],
+                resources: ["*"],
+                effect: Effect.ALLOW
+            }))
+
+            lambdaRole?.addToPrincipalPolicy(
+                new PolicyStatement({
+                    resources: [
+                        `arn:aws:ssm:${Stack.of(this).region}:${
+                            Stack.of(this).account
+                        }:parameter/CFN-parametersekyc*`
+                    ],
+                    actions: [
+                        "ssm:GetParameter",
+                        "ssm:DescribeParameters",
+                        "ssm:GetParameters",
+                        "ssm:GetParametersByPath",
+                    ],
+                    effect: Effect.ALLOW
+                })
+            );
 
             lambdaRole?.addToPrincipalPolicy(
                 new PolicyStatement({
@@ -126,7 +161,7 @@ export default class EKYCApiConstruct extends Construct {
 
             lambdaRole.addManagedPolicy(
                 ManagedPolicy.fromAwsManagedPolicyName(
-                    "service-role/AWSLambdaBasicExecutionRole"
+                    "service-role/AWSLambdaVPCAccessExecutionRole"
                 )
             );
 
@@ -138,13 +173,30 @@ export default class EKYCApiConstruct extends Construct {
                 ManagedPolicy.fromAwsManagedPolicyName("AmazonRekognitionFullAccess")
             );
 
-            lambdaRole.addManagedPolicy(
-                ManagedPolicy.fromAwsManagedPolicyName("AmazonTextractFullAccess")
-            );
+            const textractPolicyStatement = new PolicyStatement({
+                actions: [
+                    "textract:AnalyzeDocument",
+                    "textract:AnalyzeID",
+                    "textract:DetectDocumentText",
+                    // Add other Textract actions here if needed
+                ],
+                resources: ["*"], // This allows access to all documents. Adjust as per your requirements.
+            });
 
-            lambdaRole.addManagedPolicy(
-                ManagedPolicy.fromAwsManagedPolicyName("AWSXrayFullAccess")
-            );
+            backendFn.addToRolePolicy(textractPolicyStatement)
+
+            const xrayPolicyStatement = new PolicyStatement({
+                actions: [
+                    "xray:PutTraceSegments",
+                    "xray:PutTelemetryRecords",
+                    "xray:GetSamplingRules",
+                    "xray:GetSamplingTargets",
+                    "xray:GetSamplingStatisticSummaries"
+                ],
+                resources: ["*"],
+            });
+            backendFn.addToRolePolicy(xrayPolicyStatement)
+
         }
 
         const nodeId = this.node.addr;
@@ -172,7 +224,7 @@ export default class EKYCApiConstruct extends Construct {
                     "X-Amz-Security-Token",
                     "X-Amz-User-Agent",
                 ],
-                statusCode:200
+                statusCode: 200
             },
             apiKeySourceType: ApiKeySourceType.HEADER,
             defaultMethodOptions: {

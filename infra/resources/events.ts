@@ -4,9 +4,11 @@ import * as events from "aws-cdk-lib/aws-events";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from 'aws-cdk-lib/aws-iam'
+import {Effect, PolicyStatement} from 'aws-cdk-lib/aws-iam'
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
 import permissionUtils from '../utils/Permissions'
 import {Construct} from "constructs";
+import {Duration} from "aws-cdk-lib";
 
 //import * as eventTargets from '@aws-cdk/aws-events-targets'
 
@@ -28,16 +30,17 @@ export default class EventConstructs extends Construct {
             "groundtruth-eventchange-handler",
             {
                 runtime: lambda.Runtime.DOTNET_6,
+                timeout: Duration.minutes(1),
                 handler:
                     "GroundTruthJobHandler::GroundTruthJobHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
-                    "../packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler/bin/Debug/netcoreapp3.1"
+                    "../packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler/bin/Debug/net6.0"
                 ),
                 environment: {
                     TrainingTableName: props.trainingTable.tableName,
                     TrainingBucket: props.trainingBucket.bucketName,
-                    RekognitionCustomLabelsProjectVersionArnParameterName:props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
-                    RekognitionCustomLabelsProjectArnParameterName:props.RekognitionCustomLabelsProjectArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectVersionArnParameterName: props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectArnParameterName: props.RekognitionCustomLabelsProjectArnParameter.parameterName,
                 },
             }
         );
@@ -50,13 +53,23 @@ export default class EventConstructs extends Construct {
                 triggerRekognitionCustomLabelsTrainingRole
             );
 
-            permissionUtils.addDynamoDbPermissions(props.trainingTable,triggerRekognitionCustomLabelsTrainingRole)
+            permissionUtils.addDynamoDbPermissions(props.trainingTable, triggerRekognitionCustomLabelsTrainingRole)
 
             triggerRekognitionCustomLabelsTrainingRole.addManagedPolicy(
                 iam.ManagedPolicy.fromAwsManagedPolicyName(
                     "service-role/AWSLambdaBasicExecutionRole"
                 )
             );
+
+            triggerRekognitionCustomLabelsTrainingRole?.addToPrincipalPolicy(new PolicyStatement({
+                actions: ["ec2:DescribeNetworkInterfaces",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeInstances",
+                    "ec2:AttachNetworkInterface"],
+                resources: ["*"],
+                effect: Effect.ALLOW
+            }))
         }
 
         const checkDatasetHandler = new lambda.Function(
@@ -64,16 +77,17 @@ export default class EventConstructs extends Construct {
             "check-dataset-handler",
             {
                 runtime: lambda.Runtime.DOTNET_6,
+                timeout: Duration.minutes(1),
                 handler:
                     "CheckDatasetHandler::CheckDatasetHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
-                    "../packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject/bin/Debug/netcoreapp3.1"
+                    "../packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject/bin/Debug/net6.0"
                 ),
                 environment: {
                     TrainingTableName: props.trainingTable.tableName,
                     TrainingBucket: props.trainingBucket.bucketName,
-                    RekognitionCustomLabelsProjectVersionArnParameterName:props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
-                    RekognitionCustomLabelsProjectArnParameterName:props.RekognitionCustomLabelsProjectArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectVersionArnParameterName: props.RekognitionCustomLabelsProjectVersionArnParameter.parameterName,
+                    RekognitionCustomLabelsProjectArnParameterName: props.RekognitionCustomLabelsProjectArnParameter.parameterName,
                 },
             }
         );
@@ -84,7 +98,7 @@ export default class EventConstructs extends Construct {
 
             props.trainingBucket.grantReadWrite(checkDatasetHandlerRole);
 
-            permissionUtils.addDynamoDbPermissions(props.trainingTable,checkDatasetHandlerRole)
+            permissionUtils.addDynamoDbPermissions(props.trainingTable, checkDatasetHandlerRole)
 
 
             checkDatasetHandlerRole.addManagedPolicy(
@@ -92,6 +106,16 @@ export default class EventConstructs extends Construct {
                     "service-role/AWSLambdaBasicExecutionRole"
                 )
             );
+
+            checkDatasetHandlerRole?.addToPrincipalPolicy(new PolicyStatement({
+                actions: ["ec2:DescribeNetworkInterfaces",
+                    "ec2:CreateNetworkInterface",
+                    "ec2:DeleteNetworkInterface",
+                    "ec2:DescribeInstances",
+                    "ec2:AttachNetworkInterface"],
+                resources: ["*"],
+                effect: Effect.ALLOW
+            }))
         }
 
         const GroundTruthStateChangeRule = new events.Rule(

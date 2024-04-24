@@ -20,13 +20,13 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "typeRoots": [
-      "./node_modules/@types",
-    
+      "./node_modules/@types"
     ],
-    "outDir":"js"
+    "outDir": "js"
   },
   "exclude": [
     "node_modules",
-    "cdk.out"
+    "cdk.out",
+    "js"
   ]
 }

@@ -6,8 +6,6 @@ import Header from 'aws-northstar/components/Header';
 import {SideNavigationItemType} from 'aws-northstar/components/SideNavigation';
 import HelpPanel from 'aws-northstar/components/HelpPanel';
 import Link from 'aws-northstar/components/Link';
-import Text from 'aws-northstar/components/Text';
-import Heading from 'aws-northstar/components/Heading';
 import EkycSession from "../EkycSession";
 import TrainingJobsTable from "../TrainingJobs"
 import VerificationRequestHistory from "../VerificationRequestHistory";
@@ -41,34 +39,31 @@ function MainContent() {
     ];
 
     const navigation = (
-        <div>
+        <div key={"navdiv"}>
             {
-                navigationItems.map(ni=>{
-                    return <div key={ni.text}><a href={ni.href}>{ni.text}</a></div>
+                navigationItems.map((ni, i) => {
+                    return <div key={`ni${i}`}><a href={ni.href}>{ni.text}</a></div>
                 })
             }
-        {/*<SideNavigation*/}
-        {/*    header={{*/}
-        {/*        href: '/',*/}
-        {/*        text: 'eKYC Test Interface',*/}
-        {/*    }}*/}
-        {/*    items={navigationItems}*/}
-        {/*/>*/}
+            {/*<SideNavigation*/}
+            {/*    header={{*/}
+            {/*        href: '/',*/}
+            {/*        text: 'eKYC Test Interface',*/}
+            {/*    }}*/}
+            {/*    items={navigationItems}*/}
+            {/*/>*/}
         </div>
     );
     const helpPanel = (
         <HelpPanel
-            header="Help panel title (h2)"
+            header="Help"
             learnMoreFooter={[
-                <Link key='internalDoc' href="/docs">Link to internal documentation</Link>,
-                <Link key='externalDoc' href="https://www.yoursite.com">Link to external documentation</Link>,
+
+                <Link target={"_blank"} key='externalDoc' href="https://github.com/aws-samples/aws-ekyc-sample">GitHub
+                    Repo</Link>,
             ]}
         >
-            <Text variant="p">
-                This is a paragraph with some <b>bold text</b> and also some <i>italic text.</i>
-            </Text>
-            <Heading variant="h4">h4 section header</Heading>
-            <Heading variant="h5">h5 section header</Heading>
+
         </HelpPanel>
     );
     /*const breadcrumbGroup = (
@@ -94,24 +89,10 @@ function MainContent() {
         />
     );*/
     const defaultNotifications = [
-        {
-            id: '1',
-            header: 'Successfully updated 4 orders',
-            type: 'success',
-            content: 'This is a success flash message.',
-            dismissible: true,
-        },
-        {
-            id: '2',
-            header: 'Failed to update 1 order',
-            type: 'error',
-            content: 'This is a dismissible error message with a button.',
-            buttonText: 'Retry',
-            onButtonClick: () => console.log('Button clicked'),
-            dismissible: true,
-        },
+
         {
             id: '3',
+            key: 'warningNotification',
             header: 'Warning',
             type: 'warning',
             content: 'This is warning content',
@@ -148,17 +129,18 @@ function MainContent() {
                 helpPanel={helpPanel}>
 
                 <Switch>
-                    <Route path="/" >
+                    <Route path="/">
                         {mainContent}
                     </Route>
-                    <Route path="/session">{EkycSession}</Route>
-                    <Route path="/history">{VerificationRequestHistory}</Route>
-                    <Route path="/training">{TrainingJobsTable}</Route>
-                    <Route path="/fields" >{FieldData}</Route>
-                    <Route path="/newjob">{NewTrainingJob}</Route>
-                    <Route path="/logout"><>
+                    <Route key={"session"} path="/session">{EkycSession}</Route>
+                    <Route key={"history"} path="/history">{VerificationRequestHistory}</Route>
+                    <Route key={"training"} path="/training">{TrainingJobsTable}</Route>
+                    <Route key={"fields"} path="/fields">{FieldData}</Route>
+                    <Route key={"job"} path="/newjob">{NewTrainingJob}</Route>
+                    <Route key={"logout"} path="/logout"><>
                         <Button onClick={handleLogout}>Log Out</Button>
-                    </></Route>
+                    </>
+                    </Route>
 
                 </Switch>
             </AppLayout>

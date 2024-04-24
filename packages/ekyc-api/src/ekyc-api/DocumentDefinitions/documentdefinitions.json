@@ -1,6 +1,15 @@
 {
   "DocumentTypes": [
     {
+      "Name": "GENERIC",
+      "FullName": "Generic",
+      "SignatureExtractionSupported": true,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": []
+    },
+    {
       "Name": "MY_NRIC",
       "FullName": "Malaysian NRIC",
       "SignatureExtractionSupported": false,
@@ -101,6 +110,63 @@
             "Height": 0.04
           },
           "RegexExpression": "^\\d{1,2}\\s\\w{3}\\s\\d{4}$"
+        }
+      ]
+    },
+    {
+      "Name": "THAI_ID_FRONT",
+      "FullName": "Thai ID Card Front",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": true,
+      "LivenessSupported": true,
+      "Landmarks": [],
+      "DataFields": [
+        {
+          "Name": "Thai Address",
+          "ExpectedBoundingBox": {
+            "Left": 0.105,
+            "Width": 0.609,
+            "Top": 0.61,
+            "Height": 0.149
+          },
+          "Language": "th"
+        },
+        {
+          "Name": "English First Name",
+          "ExpectedBoundingBox": {
+            "Left": 0.377,
+            "Width": 0.49,
+            "Top": 0.289,
+            "Height": 0.046
+          }
+        }
+      ]
+    },
+    {
+      "Name": "THAI_ID_BACK",
+      "FullName": "Thai ID Card Back",
+      "SignatureExtractionSupported": false,
+      "FaceExtractionSupported": false,
+      "LivenessSupported": false,
+      "Landmarks": [],
+      "DataFields": [
+        {
+          "Name": "ID1",
+          "ExpectedBoundingBox": {
+            "Left": 0.264,
+            "Width": 0.632,
+            "Top": 0.2,
+            "Height": 0.071
+          }
+        },
+        {
+          "Name": "ID2",
+          "ExpectedBoundingBox": {
+            "Left": 0.377,
+            "Width": 0.49,
+            "Top": 0.289,
+            "Height": 0.046
+          }
         }
       ]
     },
