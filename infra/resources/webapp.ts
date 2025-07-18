@@ -95,7 +95,7 @@ export default class WebAppConstruct extends Construct {
 
 
         new core.CfnOutput(this, "Web-CloudFrontUrlV2", {
-            value: this.cfWebV2.distributionDomainName,
+            value: `https://${this.cfWebV2.distributionDomainName}`,
         });
 
         new core.CfnOutput(this, "Web-CloudFrontDistributionIdV2", {
@@ -117,7 +117,7 @@ export default class WebAppConstruct extends Construct {
                 this,
                 `UploadWebsiteConfigFunction`,
                 {
-                    runtime: Runtime.PYTHON_3_7,
+                    runtime: Runtime.PYTHON_3_11,
                     handler: "app.on_event",
                     code: Code.fromAsset(
                         path.resolve(__dirname, "upload-website-config-handler")

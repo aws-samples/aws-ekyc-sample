@@ -1,9 +1,7 @@
 {
   "name": "infra",
   "version": "0.1.0",
-  "bin": {
-    "infra": "bin/infra.js"
-  },
+  "bin": "bin/infra.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -24,8 +22,9 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.89.0",
-    "constructs": "^10.2.69",
+    "aws-cdk-lib": "^2.147.0",
+    "constructs": "^10.3.0",
+    "deploy-time-build": "^0.3.21",
     "source-map-support": "0.5.16",
     "vm2": "^3.9.18"
   }
