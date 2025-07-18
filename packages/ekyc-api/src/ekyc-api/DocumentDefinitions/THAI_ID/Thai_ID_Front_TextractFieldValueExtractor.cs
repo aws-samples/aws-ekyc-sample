@@ -179,9 +179,11 @@ public class Thai_ID_Front_TextractFieldValueExtractor : IFieldValueExtractor
             await originalImage.SaveAsPngAsync(ms);
             ms.Seek(0, SeekOrigin.Begin);
             var tessResponse = await Tesseract.GetThaiIdFrontDataFromTesseract(ms, "front.png");
-            values = values
-                .Union(tessResponse.ToDictionary())
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            if (tessResponse != null)
+                values = values
+                    .Union(tessResponse.ToDictionary())
+                    .ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         // Get fields from base
