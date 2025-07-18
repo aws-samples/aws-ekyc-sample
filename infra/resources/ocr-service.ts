@@ -1,13 +1,23 @@
 import * as path from "path";
 import {CfnOutput, Stage} from "aws-cdk-lib";
 import {IVpc, Peer, Port, SecurityGroup} from "aws-cdk-lib/aws-ec2";
-import {DockerImageAsset, NetworkMode, Platform} from "aws-cdk-lib/aws-ecr-assets";
-import {Cluster, ContainerImage,} from "aws-cdk-lib/aws-ecs";
-import {Effect, PolicyStatement, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
+import {DockerImageAsset, Platform} from "aws-cdk-lib/aws-ecr-assets";
+import {
+    Cluster,
+    ContainerImage,
+    CpuArchitecture,
+    FargateTaskDefinition,
+    LogDriver,
+    OperatingSystemFamily,
+} from "aws-cdk-lib/aws-ecs";
+import {Effect, PolicyStatement, Role} from "aws-cdk-lib/aws-iam";
 import {Construct} from "constructs";
 import {Bucket} from "aws-cdk-lib/aws-s3";
 import {ApplicationLoadBalancedFargateService} from "aws-cdk-lib/aws-ecs-patterns";
 import {ApplicationProtocol} from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import {SociIndexBuild} from "deploy-time-build";
+import {LogGroup, RetentionDays} from "aws-cdk-lib/aws-logs";
+import {RemovalPolicy} from "aws-cdk-lib/core";
 
 export const OCR_SERVICE_PORT = 8000;
 
@@ -19,7 +29,7 @@ export interface OcrServiceProps {
 
 export class OcrServiceConstruct extends Construct {
     public readonly ecsService: ApplicationLoadBalancedFargateService;
-    public readonly apiRole: Role;
+
 
     // public readonly ocrDistribution: CloudFrontWebDistribution
 
@@ -27,16 +37,36 @@ export class OcrServiceConstruct extends Construct {
         super(scope, id);
         const stageName = Stage.of(this)?.stageName || "Dev";
         const {vpc, ecsRole} = props;
-        this.apiRole = new Role(this, `api-role`, {
-            assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
-        });
+
 
         const cluster = new Cluster(this, "ApiCluster", {
             vpc,
             containerInsights: true,
         });
 
-        this.apiRole.addToPolicy(
+
+        const sg = new SecurityGroup(this, `${stageName}ocrservice`, {
+            vpc: props.vpc,
+            allowAllOutbound: true,
+            securityGroupName: `${id}OcrServiceSecurityGroup`,
+        });
+
+        sg.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Port.tcp(OCR_SERVICE_PORT));
+
+        const taskDefinition = new FargateTaskDefinition(
+            this,
+            "TaskDefinition",
+            {
+                cpu: 4096,
+                memoryLimitMiB: 16384,
+                runtimePlatform: {
+                    cpuArchitecture: CpuArchitecture.ARM64,
+                    operatingSystemFamily: OperatingSystemFamily.LINUX,
+                },
+            }
+        );
+
+        taskDefinition.addToTaskRolePolicy(
             new PolicyStatement({
                 effect: Effect.ALLOW,
                 resources: ["*"],
@@ -67,29 +97,35 @@ export class OcrServiceConstruct extends Construct {
             }),
         );
 
-        const sg = new SecurityGroup(this, `${stageName}ocrservice`, {
-            vpc: props.vpc,
-            allowAllOutbound: true,
-            securityGroupName: `${id}OcrServiceSecurityGroup`,
+
+        const taskLogGroup = new LogGroup(this, "OcrServiceLogGroup", {
+            removalPolicy: RemovalPolicy.DESTROY,
+            retention: RetentionDays.ONE_WEEK,
         });
 
-        sg.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Port.tcp(OCR_SERVICE_PORT));
-
-        const imageAsset = new DockerImageAsset(this, `${stageName}OcrServiceImageAsset`, {
-            directory:
-                path.join(__dirname, "../../packages/inference-api/ekyc-inference-api"),
-            platform: Platform.LINUX_AMD64,
-            networkMode: NetworkMode.HOST,
+        const asset = new DockerImageAsset(this, "Image", {
+            directory: path.join(__dirname, "../../packages/inference-api/ekyc-inference-api"),
+            platform: Platform.LINUX_ARM64,
         });
+        SociIndexBuild.fromDockerImageAsset(this, "Index", asset);
+
+        const container = taskDefinition.addContainer('Container', {
+            image: ContainerImage.fromDockerImageAsset(asset),
+            logging: LogDriver.awsLogs({
+                streamPrefix: "ocr-service",
+                logGroup: taskLogGroup,
+            }),
+        })
+
+        container.addPortMappings({
+            containerPort: 8000,
+            hostPort: 8000
+        })
 
         this.ecsService = new ApplicationLoadBalancedFargateService(this, 'FargateService', {
             cluster,
             securityGroups: [sg],
-            taskImageOptions: {
-                image: ContainerImage.fromDockerImageAsset(imageAsset),
-                containerPort: 8000,
-                executionRole: ecsRole,
-            },
+            taskDefinition,
             listenerPort: 8000,
             targetProtocol: ApplicationProtocol.HTTP,
             memoryLimitMiB: 16384,

@@ -87,14 +87,14 @@ export class TrainingWorkflowConstruct extends Construct {
 
         const postLabellingLambda = new DockerImageFunction(this, `${id}-PostLabellingFn`, {
             code: DockerImageCode.fromImageAsset(path.join(__dirname, "./training/labelling_complete"), {
-                platform: Platform.LINUX_AMD64,
+                platform: Platform.LINUX_ARM64,
                 file: "dockerfile"
             }),
             vpc: vpc,
             memorySize: 3008,
             ephemeralStorageSize: Size.gibibytes(5),
             timeout: Duration.minutes(10),
-            architecture: Architecture.X86_64,
+            architecture: Architecture.ARM_64,
             role: lambdaRole,
             environment: {
                 STORAGE_BUCKET: props.StorageBucket.bucketName,

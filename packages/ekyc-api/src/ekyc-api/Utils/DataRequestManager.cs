@@ -24,6 +24,11 @@ namespace ekyc_api.Utils
             dynamoDbContext = new DynamoDBContext(_dynamoDbClient);
         }
 
+        /// <summary>
+        /// Checks if a data request with the specified ID exists and is valid.
+        /// </summary>
+        /// <param name="Id">The ID of the data request.</param>
+        /// <returns>True if the data request exists and is valid; otherwise, false.</returns>
         public async Task<bool> DataRequestExistsAndIsValid(string Id)
         {
             if (string.IsNullOrEmpty(Id))
@@ -47,6 +52,11 @@ namespace ekyc_api.Utils
             return true;
         }
 
+        /// <summary>
+        /// Creates a new data request with the specified user agent.
+        /// </summary>
+        /// <param name="UserAgent">The user agent associated with the data request.</param>
+        /// <returns>The newly created data request.</returns>
         public async Task<DataRequest> CreateNewRequest(string UserAgent)
         {
             var newDataRequest = new DataRequest();

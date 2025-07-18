@@ -8,23 +8,18 @@ popd
 pushd packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler
 dotnet publish -c Debug
 popd
-#### Build the Check Rekogion Project Lambda
+#### Build the Check Rekognition Project Lambda
 pushd packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject
 dotnet publish -c Debug
 popd
 #### Build the User Interface
-pushd packages/ui
-yarn
-rm -rf build
-yarn run build
-popd
-#### Build the User Interface v2
 pushd packages/webv2
 yarn
 rm -rf build
 yarn run build
 popd
 #### Build the CDK stack
+printf "${GREEN}Synthesizing and deploying CDK stack${NC}\n"
 pushd infra
 yarn
 rm -rf output

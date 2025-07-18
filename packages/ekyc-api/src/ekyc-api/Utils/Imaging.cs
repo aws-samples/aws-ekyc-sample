@@ -20,6 +20,9 @@ using S3Object = Amazon.Rekognition.Model.S3Object;
 
 namespace ekyc_api.Utils;
 
+/// <summary>
+/// Provides utility methods for image processing and manipulation.
+/// </summary>
 public class Imaging
 {
     private readonly IAmazonS3 _amazonS3;
@@ -48,6 +51,17 @@ public class Imaging
         return newImg;
     }
 
+    /// <summary>
+    /// Corrects the bluriness of an image by applying a sharpening filter if the image is considered blurry.
+    /// </summary>
+    /// <param name="inputImagePath">The path of the input image file.</param>
+    /// <param name="outputImagePath">The path where the corrected image will be saved.</param>
+    /// <returns>The path of the corrected image if the image is considered blurry and has been corrected; otherwise, returns the path of the original image.</returns>
+    /// <remarks>
+    /// This method calculates the bluriness of an image by computing the Laplacian of the image and measuring the standard deviation of the Laplacian.
+    /// If the computed focus measure is below a specified threshold, the image is considered blurry and a sharpening filter is applied to enhance the image details.
+    /// The sharpened image is then saved to the specified output path.
+    /// </remarks>
     public static async Task<string> CorrectBluriness(string inputImagePath, string outputImagePath)
     {
         using var image = new UMat(inputImagePath, ImreadModes.Color);
@@ -85,12 +99,23 @@ public class Imaging
         return inputImagePath;
     }
 
+    /// <summary>
+    /// Converts an angle from radians to degrees.
+    /// </summary>
+    /// <param name="radians">The angle in radians.</param>
+    /// <returns>The angle in degrees.</returns>
     public static double ConvertRadiansToDegrees(double radians)
     {
         var degrees = 180 / Math.PI * radians;
         return degrees;
     }
 
+    /// <summary>
+    /// Crops the document image based on the specified label detected by Amazon Rekognition.
+    /// </summary>
+    /// <param name="S3Key">The key of the document image stored in Amazon S3.</param>
+    /// <param name="rekognitionLabel">The label to be used for cropping the image.</param>
+    /// <returns>The key of the cropped image stored in Amazon S3.</returns>
     public static async Task<string> CropDocumentByLabel(string S3Key, string rekognitionLabel)
     {
         var _amazonS3 = new AmazonS3Client();
@@ -145,7 +170,7 @@ public class Imaging
         var newKey = "cropped/" + Guid.NewGuid() + "/image.png";
 
         await _amazonS3.PutObjectAsync(new PutObjectRequest
-            { InputStream = outStream, BucketName = Globals.StorageBucket, Key = newKey });
+        { InputStream = outStream, BucketName = Globals.StorageBucket, Key = newKey });
 
         if (!Globals.IsRunningOnLambda) await originalImage.SaveAsPngAsync("cropped.png");
 
@@ -153,6 +178,19 @@ public class Imaging
     }
 
 
+    /// <summary>
+    /// Crops a document image based on the specified parameters.
+    /// </summary>
+    /// <param name="S3Key">The key of the document image stored in Amazon S3.</param>
+    /// <param name="RekognitionCustomLabelsProjectArn">The ARN (Amazon Resource Name) of the Rekognition custom labels project.</param>
+    /// <param name="documentType">The type of the document.</param>
+    /// <returns>The key of the cropped image stored in Amazon S3.</returns>
+    /// <remarks>
+    /// This method crops a document image based on the specified document type and the Rekognition custom labels project.
+    /// It retrieves the original image from Amazon S3, detects custom labels using Rekognition, and crops the image based on the detected label.
+    /// The cropped image is then saved to Amazon S3 and its key is returned.
+    /// If no matching label is found in the image, the method returns the original image key without cropping.
+    /// </remarks>
     public static async Task<string> CropDocument(string S3Key, string RekognitionCustomLabelsProjectArn,
         DocumentTypes documentType)
     {
@@ -212,7 +250,7 @@ public class Imaging
         var newKey = "cropped/" + Guid.NewGuid() + "/image.png";
 
         await _amazonS3.PutObjectAsync(new PutObjectRequest
-            { InputStream = outStream, BucketName = Globals.StorageBucket, Key = newKey });
+        { InputStream = outStream, BucketName = Globals.StorageBucket, Key = newKey });
 
         return newKey;
     }
@@ -242,6 +280,15 @@ public class Imaging
         return img;
     }
 
+    /// <summary>
+    /// Detects and crops a document image based on the provided source S3 key.
+    /// </summary>
+    /// <param name="sourceS3Key">The S3 key of the source document image.</param>
+    /// <returns>
+    /// A tuple containing the detected document type, the cropped image as a <see cref="MemoryStream"/>,
+    /// and the bounding box of the document.
+    /// </returns>
+    /// <exception cref="Exception">Thrown when the document does not meet the minimum size requirements.</exception>
     public async Task<(DocumentTypes documentType, MemoryStream CroppedImage, BoundingBox DocumentBoundingBox)?>
         DetectAndCropDocument(
             string sourceS3Key)
@@ -262,7 +309,7 @@ public class Imaging
         // Crop the image
 
         var getResponse = await _amazonS3.GetObjectAsync(new GetObjectRequest
-            { BucketName = Globals.StorageBucket, Key = sourceS3Key });
+        { BucketName = Globals.StorageBucket, Key = sourceS3Key });
 
         var img = Image.Load(getResponse.ResponseStream);
 

@@ -17,4 +17,4 @@ async function wrapper() {
 }
 
 
-wrapper()
+void wrapper()

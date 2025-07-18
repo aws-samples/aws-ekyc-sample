@@ -1,8 +1,0 @@
-{
-  "region": "ap-southeast-1",
-  "mandatorySignIn": true,
-  "userPoolId": "ap-southeast-1_BPty6CQdA",
-  "userPoolWebClientId": "76tt6tk64si2rdt7chu6hmausd",
-  "authenticationFlowType": "USER_PASSWORD_AUTH",
-  "dataApiEndpoint": "https://rbpst7mxia.execute-api.ap-southeast-1.amazonaws.com/prod"
-}
