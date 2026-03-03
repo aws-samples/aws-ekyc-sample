@@ -13,10 +13,6 @@ os.environ["TESSDATA_PREFIX"] = os.path.abspath("./static/tessdata")
 
 def get_upload_folder():
     return '/tmp'
-    # if is_running_in_lambda():
-    #     return '/tmp/uploads'
-    # else:
-    #     return './static/uploads'
 
 
 app = Flask(__name__)
@@ -68,64 +64,61 @@ def detect_thai_text():
     return {"result": text}
 
 
-@app.route('/thai/id/front', methods=['GET', 'POST'])
+@app.route('/thai/id/front', methods=['POST'])
 def detect_thai_id_front():
-    if request.method == 'POST':
-        f = request.files['file']
-        lang = request.args.get("lang")
+    f = request.files['file']
+    lang = request.args.get("lang")
 
-        if lang is None:
-            lang = "th"
+    if lang is None:
+        lang = "th"
 
-        # create a secure filename
-        filename = secure_filename(f.filename)
+    # create a secure filename
+    filename = secure_filename(f.filename)
 
-        # save file to /static/uploads
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        print(f'Saving file to {filepath}')
-        f.save(filepath)
+    # save file to /static/uploads
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    print(f'Saving file to {filepath}')
+    f.save(filepath)
 
-        # load the example image and convert it to grayscale
-        image = cv2.imread(filepath)
+    # load the example image and convert it to grayscale
+    image = cv2.imread(filepath)
 
-        ofilename = os.path.join(app.config['UPLOAD_FOLDER'], "{}.png".format(os.getpid()))
-        cv2.imwrite(ofilename, image)
+    ofilename = os.path.join(app.config['UPLOAD_FOLDER'], "{}.png".format(os.getpid()))
+    cv2.imwrite(ofilename, image)
 
-        response = extract_thai_id_front_info(ofilename)
+    response = extract_thai_id_front_info(ofilename)
 
-        return jsonify(card_to_dict(response))
+    return jsonify(card_to_dict(response))
 
 
 @app.route('/thai/id/back', methods=['POST'])
 def detect_thai_id_back():
-    if request.method == 'POST':
-        f = request.files['file']
-        lang = request.args.get("lang")
+    f = request.files['file']
+    lang = request.args.get("lang")
 
-        if lang is None:
-            lang = "th"
+    if lang is None:
+        lang = "th"
 
-        # create a secure filename
-        filename = secure_filename(f.filename)
+    # create a secure filename
+    filename = secure_filename(f.filename)
 
-        # save file to /static/uploads
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        print(f'Saving file to {filepath}')
-        f.save(filepath)
+    # save file to /static/uploads
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    print(f'Saving file to {filepath}')
+    f.save(filepath)
 
-        # load the example image and convert it to grayscale
-        image = cv2.imread(filepath)
+    # load the example image and convert it to grayscale
+    image = cv2.imread(filepath)
 
-        ofilename = os.path.join(app.config['UPLOAD_FOLDER'], "{}.png".format(os.getpid()))
-        cv2.imwrite(ofilename, image)
+    ofilename = os.path.join(app.config['UPLOAD_FOLDER'], "{}.png".format(os.getpid()))
+    cv2.imwrite(ofilename, image)
 
-        response = extract_thai_id_back_info(ofilename)
-        print(response)
+    response = extract_thai_id_back_info(ofilename)
+    print(response)
 
-        return jsonify(card_to_dict(response))
+    return jsonify(card_to_dict(response))
 
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app.run(debug=True, host='0.0.0.0', port=port)
-    # app.run(host="0.0.0.0", port=5000, debug=True)
