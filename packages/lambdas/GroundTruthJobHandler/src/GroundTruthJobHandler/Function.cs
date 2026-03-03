@@ -16,6 +16,7 @@ using Amazon.SageMaker.Model;
 using Amazon.SageMakerRuntime;
 using ThirdParty.Json.LitJson;
 using CreateProjectRequest = Amazon.Rekognition.Model.CreateProjectRequest;
+using DatasetSource = Amazon.Rekognition.Model.DatasetSource;
 using S3Object = Amazon.Rekognition.Model.S3Object;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
