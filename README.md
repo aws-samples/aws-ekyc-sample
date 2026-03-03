@@ -1,6 +1,5 @@
 # AWS Prototyping eKYC Solution
 
-∏
 This is an "electronic know your customer" solution that is designed to help you fast-track your development of your own
 solution. It is not meant to be a production-ready solution, and will require further development and operational
 guardrails to be ready for production use.
@@ -51,7 +50,7 @@ to establish liveness and perform facial comparisons.
 
 ### User Interface
 
-The web interface under /packages/ui is designed to allow you to test the functionality of the prototype. There are 5
+The web interface under /packages/webv2 is designed to allow you to test the functionality of the prototype. There are 5
 functions on the user interface.
 
 ![User Interface](docs/ui.png)
@@ -66,9 +65,7 @@ functions on the user interface.
 
 *New Training Job*: Create a new training job by uploading images
 
-The user interface is a React.js application that is found under /packages/ui . The application utilises an open source
-framework called “Northstar” to emulate the styling of the AWS Management Console. More information about Northstar is
-available [here](https://northstar.aws-prototyping.cloud/).
+The user interface is a React.js application that is found under /packages/webv2 . The application uses [Cloudscape Design System](https://cloudscape.design/) for UI components and AWS Amplify UI for authentication and liveness verification.
 
 ## Design of the Solution
 
@@ -116,9 +113,9 @@ SageMaker Ground Truth workforce domains.
 
 ## Pre-Requisites
 
-- [.NET Core 6.0 LTS](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
-- [Node.js 18 LTS](https://nodejs.org/en/)
-- [Yarn](https://classic.yarnpkg.com/en/)
+- [.NET 8.0 LTS](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [Node.js 22 LTS](https://nodejs.org/en/)
+- [pnpm](https://pnpm.io/)
 - [Access to an AWS account](https://aws.amazon.com/account/)
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)
@@ -152,6 +149,8 @@ with the following AWS services.
 
 Run the `one-step-deploy.sh` script in the base folder. You might need to provide execution access to the file by
 running `chmod +x one-step-deploy.sh`
+
+To build all packages separately without deploying, you can use `build-all.sh`.
 
 Ensure your AWS credentials are setup in the CLI by running `aws configure`.
 
