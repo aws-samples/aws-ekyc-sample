@@ -1,9 +1,54 @@
+# OS
 .DS_Store
+Thumbs.db
+
+# IDEs
 .idea
+.vscode
 
+# Node.js / TypeScript
+node_modules
+dist/
+*.tsbuildinfo
+.eslintcache
+
+# pnpm
+.pnpm-store/
+
+# Yarn (legacy, migrated to pnpm)
+.yarn/
+.yarnrc
+.pnp.*
+
+# React build output
+packages/webv2/build/
+packages/ui/build/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.egg
+
+# .NET
+bin/
+obj/
+# CDK bin/ is source, not build output
+!infra/bin/
+
+# AWS CDK
+cdk.out/
+infra/js/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Project-specific
 packages/PostDeploymentScripts/src/output.json
-
 packages/ekyc-api/output.json
 /testdata/**
 /packages/inference-api/ekyc-inference-api/static/uploads/
-.yarn/
