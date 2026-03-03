@@ -1,3 +1,3 @@
 test('Empty Stack', () => {
-   return true
+   expect(true).toBe(true);
 });
