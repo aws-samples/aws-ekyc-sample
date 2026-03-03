@@ -36,7 +36,7 @@ export const DocumentUploader: FC<{
 
     const s3Key = "document.jpg";
 
-    const {mutate: uploadFile, isLoading: isUploadFileLoading, isSuccess: isUploadFileSuccess} = useUploadFile()
+    const {mutate: uploadFile, isPending: isUploadFileLoading, isSuccess: isUploadFileSuccess} = useUploadFile()
 
     useEffect(() => {
         if (isUploadFileSuccess && selectedDocumentType) {

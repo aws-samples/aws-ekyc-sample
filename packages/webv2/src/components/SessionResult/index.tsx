@@ -6,7 +6,7 @@ export const SessionResult: FC<{ sessionId: string }> = ({sessionId}) => {
     const {
         data: compareSelfieWithDocumentData,
         mutate: compareSelfieWithDocument,
-        isLoading: isLoadingCompareSelfie,
+        isPending: isLoadingCompareSelfie,
         isSuccess: isSuccessCompareSelfie,
         isError: isErrorCompareSelfie
     } = useCompareSelfieWithDocument()

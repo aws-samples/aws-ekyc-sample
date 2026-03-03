@@ -11,10 +11,12 @@
  *  and limitations under the License.                                                                                *
  **********************************************************************************************************************/
 
-import {Auth as AmplifyAuth} from "@aws-amplify/auth";
-import {Amplify, Hub} from "@aws-amplify/core";
+import {Amplify} from "aws-amplify";
+import {fetchAuthSession, getCurrentUser, fetchUserAttributes} from "aws-amplify/auth";
+import {Hub} from "aws-amplify/utils";
 import {Authenticator, Theme, ThemeProvider, useTheme} from "@aws-amplify/ui-react";
 import React, {createContext, useCallback, useEffect, useMemo, useState} from "react";
+import {configureApiClient} from "./apiClient";
 
 /**
  * Context for storing the runtimeContext.
@@ -82,27 +84,20 @@ const Auth: React.FC<any> = ({children}) => {
                 if (runtimeCtx.apiStage && runtimeCtx.region && runtimeCtx.userPoolId && runtimeCtx.userPoolWebClientId && runtimeCtx.identityPoolId) {
                     Amplify.configure({
                         Auth: {
-                            region: runtimeCtx.region,
-                            userPoolId: runtimeCtx.userPoolId,
-                            userPoolWebClientId: runtimeCtx.userPoolWebClientId,
-                            identityPoolId: runtimeCtx.identityPoolId,
-                        },
-                        API: {
-                            endpoints: [
-                                {
-                                    name: "ekycApi",
-                                    endpoint: runtimeCtx.apiStage,
-                                    region: runtimeCtx.region,
-                                    custom_header: async () => {
-                                        return {Authorization: `Bearer ${(await AmplifyAuth.currentSession()).getIdToken().getJwtToken()}`}
-                                    }
-                                }
-                            ]
+                            Cognito: {
+                                userPoolId: runtimeCtx.userPoolId,
+                                userPoolClientId: runtimeCtx.userPoolWebClientId,
+                                identityPoolId: runtimeCtx.identityPoolId,
+                            }
                         }
                     });
-                    AmplifyAuth.currentUserInfo()
-                        .then((user) => setRuntimeContext({...runtimeCtx, user}))
-                        .catch((e) => console.error(e));
+                    configureApiClient(runtimeCtx.apiStage);
+                    setRuntimeContext(runtimeCtx);
+                    Promise.all([getCurrentUser(), fetchUserAttributes()])
+                        .then(([currentUser, attributes]) => {
+                            setRuntimeContext({...runtimeCtx, user: {username: currentUser.username, attributes}});
+                        })
+                        .catch(() => {});
                 } else {
                     console.warn("runtime-config.json should have region, userPoolId, userPoolWebClientId & identityPoolId.");
                 }
@@ -114,23 +109,24 @@ const Auth: React.FC<any> = ({children}) => {
     }, [setRuntimeContext]);
 
     useEffect(() => {
-        Hub.listen("auth", (data) => {
+        const unsubscribe = Hub.listen("auth", (data) => {
             switch (data.payload.event) {
-                case "signIn":
-                    AmplifyAuth.currentUserInfo()
-                        .then((user) => {
+                case "signedIn":
+                    Promise.all([getCurrentUser(), fetchUserAttributes()])
+                        .then(([currentUser, attributes]) => {
                             setRuntimeContext((prevRuntimeContext: any) => ({
                                 ...prevRuntimeContext,
-                                user,
+                                user: {username: currentUser.username, attributes},
                             }));
                         })
                         .catch((e) => console.error(e));
                     break;
-                case "signOut":
+                case "signedOut":
                     window.location.reload();
                     break;
             }
         });
+        return () => unsubscribe();
     }, []);
 
     const AuthWrapper: React.FC<any> = useCallback(

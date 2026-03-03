@@ -22,7 +22,7 @@ export const StartTraining: FC = () => {
         data: createdJobArn,
         isError: isErrorCreateJobAndUpload,
         isSuccess: isSuccessCreateJobAndUpload,
-        isLoading: isLoadingCreateJobAndUpload
+        isPending: isLoadingCreateJobAndUpload
     } = useCreateJobAndUpload()
 
     if (isLoadingDocumentTypes)

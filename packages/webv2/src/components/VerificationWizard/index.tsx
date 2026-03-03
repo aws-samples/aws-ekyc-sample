@@ -25,11 +25,11 @@ export const VerificationWizard: FC = () => {
     const [verificationSessionId, setVerificationSessionId] = useState("")
     const {
         mutate: submitDocumentForVerification,
-        isLoading: isLoadingSubmitDocumentForVerification
+        isPending: isLoadingSubmitDocumentForVerification
     } = useSubmitDocumentForVerification()
 
     const {
-        mutate: startVerificationSession, isLoading: isLoadingStartVerificationSession, isSuccess:
+        mutate: startVerificationSession, isPending: isLoadingStartVerificationSession, isSuccess:
             isSuccessStartVerificationSession, data: newVerificationSession
     } = useStartVerificationSession()
 
