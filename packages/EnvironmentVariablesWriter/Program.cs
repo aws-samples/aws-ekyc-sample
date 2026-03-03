@@ -24,8 +24,6 @@ internal class Program
                  function.Configuration.Environment.Variables.Keys)
             sbEnvVars.AppendFormat($"{k}={function.Configuration.Environment.Variables[k]};");
 
-        sbEnvVars.Append(@"AWS_PROFILE=""maxbit""");
-
         using (var fs = File.Open("./environment.txt", FileMode.Create))
         {
             var bytes = Encoding.UTF8.GetBytes(sbEnvVars.ToString());
