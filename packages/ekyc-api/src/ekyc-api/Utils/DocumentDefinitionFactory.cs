@@ -30,23 +30,6 @@ public class DocumentDefinitionFactory : IDocumentDefinitionFactory
                 $"Document type {docType} is not supported.");
 
         return docDefinition;
-
-        /* switch (docType)
-         {
-             case DocumentTypes.ID_KTP:
-                 return (IDocumentDefinition) _serviceProvider.GetService(typeof(ID_KTP_DocumentDefinition));
-             case DocumentTypes.MY_NRIC:
-                 return (IDocumentDefinition) _serviceProvider.GetService(typeof(MY_NRIC_DocumentDefinition));
-             case DocumentTypes.AU_PASSPORT:
-                 return (IDocumentDefinition) _serviceProvider.GetService(typeof(AU_Passport_DocumentDefinition));
-             case DocumentTypes.KH_IC:
-                 return (IDocumentDefinition) _serviceProvider.GetService(typeof(KH_IC_DocumentDefinition));
-             case DocumentTypes.PRC_PASSPORT:
-                 return (IDocumentDefinition) _serviceProvider.GetService(typeof(PRC_Passport_DocumentDefinition));
-             default:
-                 throw new ArgumentOutOfRangeException(nameof(DocumentTypes), docType,
-                     $"Document type {docType} is not supported.");
-         }*/
     }
 
     [return: MaybeNull]

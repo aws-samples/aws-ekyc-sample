@@ -194,8 +194,7 @@ public class SessionController : ControllerBase
             throw new HttpStatusException(HttpStatusCode.InternalServerError,
                 "The selfie is not found - have you done a POST to /selfie?");
 
-        var result = _livenessChecker.CompareFaces(item.selfieImageKey, item.documentImageKey).GetAwaiter()
-            .GetResult();
+        var result = await _livenessChecker.CompareFaces(item.selfieImageKey, item.documentImageKey);
 
         return new CompareDocumentWithSelfie { IsSimilar = result.IsMatch, Similarity = result.Confidence };
     }

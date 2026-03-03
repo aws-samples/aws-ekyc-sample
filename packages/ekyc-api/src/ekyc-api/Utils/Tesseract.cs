@@ -15,19 +15,6 @@ namespace ekyc_api.Utils
     public class Tesseract
     {
         /// <summary>
-        /// Retrieves the Tesseract OCR service endpoint from the environment variable.
-        /// </summary>
-        /// <returns>The Tesseract OCR service endpoint.</returns>
-        private static string GetTesseractServiceEndpoint()
-        {
-            var endpoint = Environment.GetEnvironmentVariable("OcrServiceEndpoint");
-            if (string.IsNullOrEmpty(endpoint))
-                throw new Exception("OCR_SERVICE_ENDPOINT environment variable is not set.");
-
-            return endpoint;
-        }
-
-        /// <summary>
         /// Calls the Tesseract OCR endpoint, passing in a memory stream containing an image.
         /// </summary>
         /// <param name="ms">The memory stream containing the image.</param>
@@ -39,14 +26,13 @@ namespace ekyc_api.Utils
 
             var options = new RestClientOptions(Globals.OcrServiceEndpoint)
             {
-                MaxTimeout = 15000
+                Timeout = TimeSpan.FromSeconds(15)
             };
             var client = new RestClient(options);
-            var url = $"{GetTesseractServiceEndpoint()}/thai";
-            var request = new RestRequest(url, Method.Post);
+            var request = new RestRequest("/thai", Method.Post);
             request.AlwaysMultipartFormData = true;
             request.AddFile("file", ms.ToArray(), fileName, ContentType.FormUrlEncoded);
-            Console.WriteLine($"Sending request to Tesseract OCR service at {url}");
+            Console.WriteLine($"Sending request to Tesseract OCR service at {Globals.OcrServiceEndpoint}/thai");
             var response = await client.ExecuteAsync(request);
 
             Console.WriteLine(response.Content);
@@ -70,17 +56,16 @@ namespace ekyc_api.Utils
 
             var options = new RestClientOptions(Globals.OcrServiceEndpoint)
             {
-                MaxTimeout = 15000
+                Timeout = TimeSpan.FromSeconds(15)
             };
 
             ms.Seek(0, SeekOrigin.Begin);
 
             var client = new RestClient(options);
-            var url = $"{GetTesseractServiceEndpoint()}/thai/id/front";
-            var request = new RestRequest(url, Method.Post);
+            var request = new RestRequest("/thai/id/front", Method.Post);
             request.AlwaysMultipartFormData = true;
             request.AddFile("file", ms.ToArray(), fileName, ContentType.FormUrlEncoded);
-            Console.WriteLine($"Sending request to Tesseract OCR service at {url}");
+            Console.WriteLine($"Sending request to Tesseract OCR service at {Globals.OcrServiceEndpoint}/thai/id/front");
             var response = await client.ExecuteAsync(request);
             Console.WriteLine(response.Content);
             if (response?.Content == null)

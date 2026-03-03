@@ -78,7 +78,7 @@ public class DataController : ControllerBase
         var manager = new DataRequestManager(_config, _amazonS3, _dynamoDb);
 
         if (request.RequestId == null ||
-            !manager.DataRequestExistsAndIsValid(request.RequestId).GetAwaiter().GetResult())
+            !await manager.DataRequestExistsAndIsValid(request.RequestId))
             throw new HttpStatusException(HttpStatusCode.BadRequest,
                 "Request is invalid - did you create a new request first?");
 
@@ -240,7 +240,7 @@ public class DataController : ControllerBase
                 tasks.Add(landmarksTask);
             }
 
-            Task.WaitAll(tasks.ToArray());
+            await Task.WhenAll(tasks.ToArray());
 
             var response = new GetFullDocumentResponse
             {
@@ -252,6 +252,7 @@ public class DataController : ControllerBase
             if (documentDefinition.Landmarks?.Length > 0)
                 response.Landmarks = landmarksTask?.Result;
 
+            AWSXRayRecorder.Instance.EndSubsegment();
 
             return response;
         }
@@ -269,7 +270,7 @@ public class DataController : ControllerBase
         var manager = new DataRequestManager(_config, _amazonS3, _dynamoDb);
 
         if (request.RequestId == null ||
-            !manager.DataRequestExistsAndIsValid(request.RequestId).GetAwaiter().GetResult())
+            !await manager.DataRequestExistsAndIsValid(request.RequestId))
             throw new HttpStatusException(HttpStatusCode.BadRequest,
                 "Request is invalid - did you create a new request first?");
 
@@ -360,7 +361,7 @@ public class DataController : ControllerBase
         _logger.LogDebug($"Get Presigned Url: Request Id - {requestId}, S3 Key - {s3Key}");
         var manager = new DataRequestManager(_config, _amazonS3, _dynamoDb);
 
-        if (requestId == null || !manager.DataRequestExistsAndIsValid(requestId).GetAwaiter().GetResult())
+        if (requestId == null || !await manager.DataRequestExistsAndIsValid(requestId))
             throw new HttpStatusException(HttpStatusCode.BadRequest,
                 "Request is invalid - did you create a new request first?");
 

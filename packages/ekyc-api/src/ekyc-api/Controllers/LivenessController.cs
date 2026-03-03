@@ -52,7 +52,7 @@ public class LivenessController : ControllerBase
 
     [HttpPost]
     [Route("createsession/{sessionId}/{sessionToken}")]
-    public async Task<CreateSessionResponse> CreateLivenessSession(string sessionId, string sessionToken)
+    public async Task<DataDefinitions.CreateSessionResponse> CreateLivenessSession(string sessionId, string sessionToken)
     {
         // Need to hardcode the region as Liveness is not supported in all regions yet
         var rekognitionClient = new AmazonRekognitionClient(RegionEndpoint.APNortheast1);
@@ -79,7 +79,7 @@ public class LivenessController : ControllerBase
 
         await _dbContext.SaveAsync(item, config);
 
-        return new CreateSessionResponse { livenessSessionId = response.SessionId, sessionId = sessionId };
+        return new DataDefinitions.CreateSessionResponse { livenessSessionId = response.SessionId, sessionId = sessionId };
     }
 
     [HttpGet]
@@ -115,11 +115,6 @@ public class LivenessController : ControllerBase
         // Copy the selfie image
         if (response.AuditImages?.Count > 0)
         {
-            // var getAuditImageResponse = await s3ClientAPNE1.GetObjectAsync(new GetObjectRequest
-            // {
-            //     BucketName = response.AuditImages[0].S3Object.Bucket,
-            //     Key = response.AuditImages[0].S3Object.Name
-            // });
             var s3Key = session.Id + "/selfie.jpg";
             var ms = new MemoryStream();
             response.AuditImages[0].Bytes.CopyTo(ms);

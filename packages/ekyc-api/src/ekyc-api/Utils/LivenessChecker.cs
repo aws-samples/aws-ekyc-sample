@@ -25,7 +25,6 @@ public class LivenessChecker : ILivenessChecker
     private readonly IAmazonDynamoDB _dynamoDbClient;
     private readonly DynamoDBContext dynamoDbContext;
     private FaceDetail _eyesClosedFaceDetail;
-    private ILivenessChecker _livenessChecker;
     private float _minConfidence;
     private IDocumentChecker _documentChecker;
 
@@ -82,7 +81,10 @@ public class LivenessChecker : ILivenessChecker
         });
 
         if (response == null || response.FaceDetails == null || response.FaceDetails.Count != 1)
+        {
+            AWSXRayRecorder.Instance.EndSubsegment();
             return false;
+        }
 
         var faceDetail = response.FaceDetails[0];
 
@@ -92,24 +94,60 @@ public class LivenessChecker : ILivenessChecker
         var YDrift = Math.Abs(faceMidpointY - 0.5f);
 
         if (XDrift > Globals.FaceMaxDriftFromCentre)
+        {
+            AWSXRayRecorder.Instance.EndSubsegment();
             return false;
+        }
 
         if (YDrift > Globals.FaceMaxDriftFromCentre)
+        {
+            AWSXRayRecorder.Instance.EndSubsegment();
             return false;
+        }
 
         AWSXRayRecorder.Instance.EndSubsegment();
 
         return true;
     }
 
-    public Task<(bool IsMatch, float Confidence)> CompareFaces(string sourceKey, string targetKey)
+    public async Task<(bool IsMatch, float Confidence)> CompareFaces(string sourceKey, string targetKey)
     {
-        throw new NotImplementedException();
+        AWSXRayRecorder.Instance.BeginSubsegment("LivenessChecker::CompareFaces");
+
+        var response = await _amazonRekognition.CompareFacesAsync(new CompareFacesRequest
+        {
+            SourceImage = new Amazon.Rekognition.Model.Image
+            {
+                S3Object = new S3Object
+                {
+                    Bucket = Globals.StorageBucket,
+                    Name = sourceKey
+                }
+            },
+            TargetImage = new Amazon.Rekognition.Model.Image
+            {
+                S3Object = new S3Object
+                {
+                    Bucket = Globals.StorageBucket,
+                    Name = targetKey
+                }
+            },
+            SimilarityThreshold = (float)Globals.GetMinimumConfidence()
+        });
+
+        AWSXRayRecorder.Instance.EndSubsegment();
+
+        if (response.FaceMatches == null || response.FaceMatches.Count == 0)
+            return (false, 0f);
+
+        var bestMatch = response.FaceMatches.OrderByDescending(m => m.Similarity).First();
+        return (true, bestMatch.Similarity);
     }
 
     public Task<bool> VerifyImageSize(Image img)
     {
-        throw new NotImplementedException();
+        var meetsMinimum = img.Width >= Globals.MinDocumentWidth && img.Height >= Globals.MinDocumentHeight;
+        return Task.FromResult(meetsMinimum);
     }
 
     /// <summary>
@@ -178,7 +216,7 @@ public class LivenessChecker : ILivenessChecker
         if (headOnImage == null)
             return $"Invalid selfie image for session {sessionId}.";
 
-        selfieFaceDetails = GetFaces(session.selfieImageKey).GetAwaiter().GetResult().FirstOrDefault();
+        selfieFaceDetails = (await GetFaces(session.selfieImageKey)).FirstOrDefault();
 
         var selfiePoseError = await VerifySelfieFacePose(selfieFaceDetails);
 
@@ -228,7 +266,7 @@ public class LivenessChecker : ILivenessChecker
             return $"Nose verification image does not match the selfie image for session {sessionId}";
 
         var noseVerifyResponse =
-            VerifyNoseLocation(session, nosePointImage, selfieFaceDetails).GetAwaiter().GetResult();
+            await VerifyNoseLocation(session, nosePointImage, selfieFaceDetails);
 
         AWSXRayRecorder.Instance.EndSubsegment();
 
@@ -369,7 +407,10 @@ public class LivenessChecker : ILivenessChecker
             strError.Append("Please do not tilt your head left or right.");
 
         if (strError.Length > 0)
+        {
+            AWSXRayRecorder.Instance.EndSubsegment();
             return strError.ToString();
+        }
 
         AWSXRayRecorder.Instance.EndSubsegment();
 
@@ -396,74 +437,7 @@ public class LivenessChecker : ILivenessChecker
     private async Task<bool> CompareFacialLandmarks(SessionObject session, FaceDetail nosePointingFace,
         FaceDetail selfieFace)
     {
-        AWSXRayRecorder.Instance.BeginSubsegment("LivenessChecker::VerifyImageLiveness");
-
-        /*      var npfMouthRight = nosePointingFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.MouthRight);
-            var npfMouthLeft = nosePointingFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.MouthLeft);
-            var npfNose =  nosePointingFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.Nose);
-            var npfLeftEye = nosePointingFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.EyeLeft);
-            var npfRightEye = nosePointingFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.EyeRight);
-
-
-
-            var selfieMouthRight = selfieFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.MouthRight);
-            var selfieMouthLeft = nosePointingFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.MouthLeft);
-            var selfieNose = selfieFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.Nose);
-            var selfieLeftEye = selfieFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.EyeLeft);
-            var selfieRightEye = selfieFace.Landmarks.FirstOrDefault(a => a.Type == LandmarkType.EyeRight);
-
-            if (npfMouthLeft == null)
-                throw new Exception("Unable to find the left corner of the mouth for the nose pointing image.");
-
-            if (npfMouthRight == null)
-                throw new Exception("Unable to find the right corner of the mouth for the nose pointing image.");
-
-            if (npfNose == null)
-                throw new Exception("Unable to find the nose for the nose pointing image.");
-
-            if (npfRightEye == null)
-                throw new Exception("Unable to find the right eye for the nose pointing image.");
-
-            if (npfLeftEye == null)
-                throw new Exception("Unable to find the left eye for the nose pointing image.");
-
-
-            if (selfieMouthRight == null)
-                throw new Exception("Unable to find the right corner of the mouth for the selfie.");
-
-            if (selfieMouthLeft == null)
-                throw new Exception("Unable to find the left corner of the mouth for the selfie");
-
-            if (selfieNose == null)
-                throw new Exception("Unable to find the nose for the selfie.");
-
-            if (npfRightEye == null)
-                throw new Exception("Unable to find the right eye for the selfie.");
-
-            if (npfLeftEye == null)
-                throw new Exception("Unable to find the left eye for the selfie.");
-
-          // Nose point calculation
-
-            double npfMouthLeftAndNoseDegrees = GetTangentDegreesBetweenLandmarks(npfMouthLeft, npfNose);
-
-            double npfMouthRightAndNoseDegrees = GetTangentDegreesBetweenLandmarks(npfMouthRight,
-                npfNose);
-
-            double npfLeftEyeAndNoseDegrees = GetTangentDegreesBetweenLandmarks(npfNose, npfLeftEye);
-
-            double npfRightEyeAndNoseDegrees = GetTangentDegreesBetweenLandmarks(npfNose, npfRightEye);
-
-            // Selfie calculation
-
-            double selfieMouthLeftAndNoseDegrees = GetTangentDegreesBetweenLandmarks(selfieMouthLeft, selfieNose);
-
-            double selfieMouthRightAndNoseDegrees = GetTangentDegreesBetweenLandmarks(selfieMouthRight,
-                selfieNose);
-
-            double selfieLeftEyeAndNoseDegrees = GetTangentDegreesBetweenLandmarks(selfieNose, selfieLeftEye);
-
-            double selfieRightEyeAndNoseDegrees = GetTangentDegreesBetweenLandmarks(selfieNose, selfieRightEye);*/
+        AWSXRayRecorder.Instance.BeginSubsegment("LivenessChecker::CompareFacialLandmarks");
 
         Console.WriteLine(
             $"Session Nose Pointing Coordinates: X - {session.nosePointAreaLeft}, Y - {session.nosePointAreaTop}");
@@ -483,16 +457,6 @@ public class LivenessChecker : ILivenessChecker
 
             if (!poseFit)
                 return false;
-            /*
-            // We expect the tangent of the left of the mouth to the nose to be smaller
-
-            if (npfMouthRightAndNoseDegrees >= selfieMouthRightAndNoseDegrees)
-                return false;
-
-            // We expect the tangent of the left eye to the nose to be smaller
-            if (npfLeftEyeAndNoseDegrees >= selfieLeftEyeAndNoseDegrees)
-                return false;
-*/
         }
 
 
@@ -504,16 +468,6 @@ public class LivenessChecker : ILivenessChecker
 
             if (!poseFit)
                 return false;
-            /*
-             // We expect the tangent of the right of the mouth to the nose to be smaller
-
-             if (npfMouthLeftAndNoseDegrees >= selfieMouthLeftAndNoseDegrees)
-                 return false;
-
-             // We expect the tangent of the left eye to the nose to be smaller
-             if (npfLeftEyeAndNoseDegrees >= selfieLeftEyeAndNoseDegrees)
-                 return false;
-                 */
         }
 
         // Bottom left quadrant
@@ -537,7 +491,7 @@ public class LivenessChecker : ILivenessChecker
                 return false;
         }
 
-        AWSXRayRecorder.Instance.BeginSubsegment("LivenessChecker::CompareFacialLandmarks");
+        AWSXRayRecorder.Instance.EndSubsegment();
 
         return true;
     }
@@ -562,11 +516,11 @@ public class LivenessChecker : ILivenessChecker
         if (response.FaceDetails != null && response.FaceDetails.Count > 0)
         {
             _eyesClosedFaceDetail = response.FaceDetails[0];
+            AWSXRayRecorder.Instance.EndSubsegment();
             return _eyesClosedFaceDetail.EyesOpen.Value == false;
         }
 
         AWSXRayRecorder.Instance.EndSubsegment();
-
 
         return false;
     }

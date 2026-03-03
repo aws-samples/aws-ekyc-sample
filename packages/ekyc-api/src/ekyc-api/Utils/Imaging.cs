@@ -9,9 +9,6 @@ using Amazon.S3.Model;
 using Amazon.XRay.Recorder.Core;
 using ekyc_api.DataDefinitions;
 using ekyc_api.DocumentDefinitions;
-using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using BoundingBox = ekyc_api.DataDefinitions.BoundingBox;
@@ -27,7 +24,6 @@ public class Imaging
 {
     private readonly IAmazonS3 _amazonS3;
     private readonly IDocumentChecker _documentChecker;
-    protected readonly IAmazonRekognition _rekognition;
 
     public Imaging(IAmazonS3 amazonS3, IDocumentChecker documentChecker)
     {
@@ -49,54 +45,6 @@ public class Imaging
         newImg.Mutate(i => { i.Crop(new Rectangle(x, y, widthAbs, heightAbs)); });
 
         return newImg;
-    }
-
-    /// <summary>
-    /// Corrects the bluriness of an image by applying a sharpening filter if the image is considered blurry.
-    /// </summary>
-    /// <param name="inputImagePath">The path of the input image file.</param>
-    /// <param name="outputImagePath">The path where the corrected image will be saved.</param>
-    /// <returns>The path of the corrected image if the image is considered blurry and has been corrected; otherwise, returns the path of the original image.</returns>
-    /// <remarks>
-    /// This method calculates the bluriness of an image by computing the Laplacian of the image and measuring the standard deviation of the Laplacian.
-    /// If the computed focus measure is below a specified threshold, the image is considered blurry and a sharpening filter is applied to enhance the image details.
-    /// The sharpened image is then saved to the specified output path.
-    /// </remarks>
-    public static async Task<string> CorrectBluriness(string inputImagePath, string outputImagePath)
-    {
-        using var image = new UMat(inputImagePath, ImreadModes.Color);
-        var laplacian = new UMat();
-        CvInvoke.Laplacian(image, laplacian, DepthType.Cv64F);
-
-        var mean = new MCvScalar();
-        var stdDev = new MCvScalar();
-        CvInvoke.MeanStdDev(laplacian, ref mean, ref stdDev);
-
-        var focusMeasure = stdDev.V0 * stdDev.V0;
-
-        // Adjust this threshold value as required.
-        var focusThreshold = 100.0;
-
-        if (focusMeasure < focusThreshold)
-        {
-            // Image is considered blurry
-            Console.WriteLine("Image is blurry. Attempting to sharpen...");
-
-            var kernel = new UMat(3, 3, DepthType.Cv32F, 1);
-            kernel.SetTo(new float[]
-            {
-                -1, -1, -1,
-                -1, 9, -1,
-                -1, -1, -1
-            });
-
-            CvInvoke.Filter2D(image, image, kernel, new System.Drawing.Point(-1, -1));
-            image.Save(outputImagePath);
-            Console.WriteLine($"Image saved to: {outputImagePath}");
-            return outputImagePath;
-        }
-
-        return inputImagePath;
     }
 
     /// <summary>
