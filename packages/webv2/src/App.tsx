@@ -27,7 +27,7 @@ import {Route, Routes, useNavigate} from "react-router-dom";
 import Auth from "./Auth";
 import Home from "./Home";
 import NavHeader from "./NavHeader";
-import {QueryClient, QueryClientProvider} from "react-query";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import FieldData from "./components/FieldData";
 import {VerificationList} from "./components/VerificationList";
 import {VerificationWizard} from "./components/VerificationWizard";

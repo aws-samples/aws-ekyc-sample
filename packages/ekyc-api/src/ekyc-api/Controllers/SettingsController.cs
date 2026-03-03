@@ -17,8 +17,7 @@ public class SettingsController : Controller
         var dto = new SettingsDTO();
         var strParamName = Environment.GetEnvironmentVariable("RekognitionCustomLabelsProjectArnParameterName");
         var client = new AmazonSimpleSystemsManagementClient();
-        var response = client.GetParameterAsync(new GetParameterRequest { Name = strParamName }
-        ).GetAwaiter().GetResult();
+        var response = await client.GetParameterAsync(new GetParameterRequest { Name = strParamName });
 
         if (response.Parameter?.Value != "default") dto.RekognitionCustomLabelsProjectArn = response.Parameter?.Value;
 

@@ -10,8 +10,6 @@ import permissionUtils from '../utils/Permissions'
 import {Construct} from "constructs";
 import {Duration} from "aws-cdk-lib";
 
-//import * as eventTargets from '@aws-cdk/aws-events-targets'
-
 interface EventConstructsProps {
     trainingBucket: s3.Bucket;
     trainingTable: dynamodb.Table;
@@ -29,12 +27,12 @@ export default class EventConstructs extends Construct {
             this,
             "groundtruth-eventchange-handler",
             {
-                runtime: lambda.Runtime.DOTNET_6,
+                runtime: lambda.Runtime.DOTNET_8,
                 timeout: Duration.minutes(1),
                 handler:
                     "GroundTruthJobHandler::GroundTruthJobHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
-                    "../packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler/bin/Debug/net6.0"
+                    "../packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler/bin/Debug/net8.0"
                 ),
                 environment: {
                     TrainingTableName: props.trainingTable.tableName,
@@ -76,12 +74,12 @@ export default class EventConstructs extends Construct {
             this,
             "check-dataset-handler",
             {
-                runtime: lambda.Runtime.DOTNET_6,
+                runtime: lambda.Runtime.DOTNET_8,
                 timeout: Duration.minutes(1),
                 handler:
                     "CheckDatasetHandler::CheckDatasetHandler.Function::FunctionHandler",
                 code: lambda.Code.fromAsset(
-                    "../packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject/bin/Debug/net6.0"
+                    "../packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject/bin/Debug/net8.0"
                 ),
                 environment: {
                     TrainingTableName: props.trainingTable.tableName,

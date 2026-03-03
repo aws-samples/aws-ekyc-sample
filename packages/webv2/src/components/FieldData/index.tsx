@@ -1,13 +1,11 @@
 import React, {useEffect, useState} from "react";
 
-import {API} from "aws-amplify";
-
 import axios from "axios";
 
 import JSONPretty from "react-json-pretty";
 import {Alert, Box, Button, Container, Header, Select, SpaceBetween, Spinner} from "@cloudscape-design/components";
 import {SelectProps} from "@cloudscape-design/components/select/interfaces";
-import {apiName} from "../../constants";
+import {apiGet, apiPost} from "../../apiClient";
 
 
 interface DocumentType {
@@ -66,7 +64,7 @@ const FieldData = () => {
         async function getDocumentTypes() {
             // Get the document types
 
-            const docTypes = await API.get(apiName, "/api/document/doctypes", {});
+            const docTypes = await apiGet("/api/document/doctypes");
 
             setDocumentTypes(docTypes);
 
@@ -83,7 +81,7 @@ const FieldData = () => {
         }
 
         async function createRequest() {
-            API.post(apiName, "/api/data/request/create", {}).then((response) => {
+            apiPost("/api/data/request/create").then((response) => {
                 console.log(`Data request created ${JSON.stringify(response)}`);
                 setRequestId(response.requestId);
                 setIsLoading(false);
@@ -134,16 +132,13 @@ const FieldData = () => {
                 )
                 .then(() => {
 
-                    API.post(apiName, "/api/data/fields/full", {
+                    apiPost("/api/data/fields/full", {
                         body: {
                             RequestId: requestId,
                             s3Key: s3Key,
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
                             documentType: selectedDocumentType.value,
                         },
-                        headers: {"Content-Type": "application/json"},
-                    }).then((response) => {
+                    }).then((response: any) => {
                         console.log(`Get field values response: ${JSON.stringify(response)}`)
                         setIsFaceLoading(false)
                         setIsLoading(false)
@@ -186,14 +181,10 @@ const FieldData = () => {
     };
 
     const getPresignedUrl = async () => {
-        const response = await API.get(apiName, "/api/data/url", {
-            queryStringParameters: {
-                requestId: requestId,
-                s3Key: s3Key,
-            },
+        return apiGet("/api/data/url", {
+            requestId: requestId!,
+            s3Key: s3Key,
         });
-
-        return response;
     };
 
     const columnDefinitions = [

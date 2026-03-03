@@ -14,10 +14,9 @@
  limitations under the License.
  ******************************************************************************************************************** */
 
-import {TopNavigation} from '@cloudscape-design/components';
-import {TopNavigationProps} from '@cloudscape-design/components/top-navigation/1.0-beta';
+import {TopNavigation, TopNavigationProps} from '@cloudscape-design/components';
 import {applyDensity, applyMode, Density, Mode} from '@cloudscape-design/global-styles';
-import {Auth as AmplifyAuth} from 'aws-amplify';
+import {signOut, updateUserAttributes, fetchUserAttributes} from 'aws-amplify/auth';
 import React, {useContext, useEffect, useState} from 'react';
 import {RuntimeConfigContext} from './Auth';
 
@@ -29,29 +28,23 @@ const NavHeader: React.FC = () => {
     const [density, setDensity] = useState('density.comfortable');
     const {runtimeContext} = useContext(RuntimeConfigContext);
 
-    const updateAttributeInCognito = async (attrib: object) => {
-        const user = await AmplifyAuth.currentUserPoolUser()
-        if (user) {
-            await AmplifyAuth.updateUserAttributes(user, attrib)
-        }
+    const updateAttributeInCognito = async (attrib: Record<string, string>) => {
+        await updateUserAttributes({userAttributes: attrib});
     }
 
     const setUiAttributesFromCognito = async () => {
-        const user = await AmplifyAuth.currentUserPoolUser()
-        if (user) {
-            const attribs = await AmplifyAuth.userAttributes(user);
-            console.log(`User attributes: ${JSON.stringify(attribs)}`)
-            if (attribs) {
-                const uiDensity = attribs.find(a => a.Name === 'custom:uiDensity')
-                if (uiDensity) {
-                    applyDensity(uiDensity.Value === 'density.comfortable' ? Density.Comfortable : Density.Compact);
-                    setDensity(uiDensity.Value)
-                }
-                const uiTheme = attribs.find(a => a.Name === 'custom:uiTheme')
-                if (uiTheme) {
-                    applyMode(uiTheme.Value === 'theme.light' ? Mode.Light : Mode.Dark);
-                    setTheme(uiTheme.Value)
-                }
+        const attribs = await fetchUserAttributes();
+        console.log(`User attributes: ${JSON.stringify(attribs)}`)
+        if (attribs) {
+            const uiDensity = attribs['custom:uiDensity']
+            if (uiDensity) {
+                applyDensity(uiDensity === 'density.comfortable' ? Density.Comfortable : Density.Compact);
+                setDensity(uiDensity)
+            }
+            const uiTheme = attribs['custom:uiTheme']
+            if (uiTheme) {
+                applyMode(uiTheme === 'theme.light' ? Mode.Light : Mode.Dark);
+                setTheme(uiTheme)
             }
         }
     }
@@ -150,7 +143,7 @@ const NavHeader: React.FC = () => {
             {id: 'signout', text: 'Sign out'},
         ],
         onItemClick: async () => {
-            await AmplifyAuth.signOut();
+            await signOut();
         },
     });
 

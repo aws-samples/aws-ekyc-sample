@@ -16,8 +16,8 @@ namespace ekyc_api.Utils
                 new AmazonSimpleNotificationServiceClient();
 
             var msg =
-                $"The livness verification for session {session.Id} has failed due to the following reason: \n\n{error}." +
-                "\n\nPlease check the log files for futher information.";
+                $"The liveness verification for session {session.Id} has failed due to the following reason: \n\n{error}." +
+                "\n\nPlease check the log files for further information.";
 
             await client.PublishAsync(new PublishRequest(Globals.ApprovalsSnsTopic, msg));
         }

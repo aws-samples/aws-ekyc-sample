@@ -10,22 +10,21 @@
     "lint": "eslint . --ext .ts"
   },
   "devDependencies": {
-    "@types/jest": "26.0.10",
-    "@types/node": "10.17.27",
-    "@typescript-eslint/eslint-plugin": "^5.11.0",
-    "@typescript-eslint/parser": "^5.11.0",
-    "aws-cdk": "1.130.0",
-    "eslint": "^8.8.0",
-    "jest": "26.4.2",
-    "ts-jest": "26.2.0",
-    "ts-node": "9.0.0",
-    "typescript": "~3.9.7"
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "aws-cdk": "^2.1108.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.189.0",
     "constructs": "^10.2.69",
     "deploy-time-build": "^0.3.21",
-    "source-map-support": "0.5.16",
-    "vm2": "^3.9.18"
+    "source-map-support": "^0.5.21"
   }
 }

@@ -11,7 +11,7 @@ async function wrapper() {
     Promise
         .all([configWriter, groundTruthCognitoSync])
         .then(() => console.log('All post-deployment tasks completed.'))
-        .catch((err) => `Error - ${err}`)
+        .catch((err) => console.error(`Error - ${err}`))
 
 
 }

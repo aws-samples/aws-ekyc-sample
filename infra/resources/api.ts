@@ -48,10 +48,10 @@ export default class EKYCApiConstruct extends Construct {
         const backendFn = new lambda.Function(this, "ekyc-proxy-handler", {
             vpc: vpc,
             timeout: Duration.minutes(1),
-            runtime: lambda.Runtime.DOTNET_6,
+            runtime: lambda.Runtime.DOTNET_8,
             handler: "ekyc-api::ekyc_api.LambdaEntryPoint::FunctionHandlerAsync",
             code: lambda.Code.fromAsset(
-                path.join(__dirname, "../../packages/ekyc-api/src/ekyc-api/bin/Debug/net6.0")
+                path.join(__dirname, "../../packages/ekyc-api/src/ekyc-api/bin/Debug/net8.0")
             ),
             //vpc: props.vpc,
             memorySize: 4096,
@@ -92,8 +92,6 @@ export default class EKYCApiConstruct extends Construct {
             permissionUtils.addDynamoDbPermissions(props.verificationHistoryTable, lambdaRole)
 
             permissionUtils.addDynamoDbPermissions(props.trainingTable, lambdaRole)
-
-            permissionUtils.addDynamoDbPermissions(props.dataRequestsTable, lambdaRole)
 
             permissionUtils.addDynamoDbPermissions(props.dataRequestsTable, lambdaRole)
 
@@ -140,22 +138,6 @@ export default class EKYCApiConstruct extends Construct {
                         "ssm:GetParametersByPath",
                     ],
                     effect: Effect.ALLOW
-                })
-            );
-
-            lambdaRole?.addToPrincipalPolicy(
-                new PolicyStatement({
-                    resources: [
-                        `arn:aws:ssm:${Stack.of(this).region}:${
-                            Stack.of(this).account
-                        }:parameter/CFN-parametersekyc*`
-                    ],
-                    actions: [
-                        "ssm:GetParameter",
-                        "ssm:DescribeParameters",
-                        "ssm:GetParameters",
-                        "ssm:GetParametersByPath",
-                    ],
                 })
             );
 

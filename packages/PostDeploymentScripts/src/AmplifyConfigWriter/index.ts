@@ -48,7 +48,7 @@ export default class AmplifyConfigWriter  {
 
         console.log(`JSON output: ${strOutput}`)
 
-        await fs.writeFileSync(absPath, strOutput)
+        fs.writeFileSync(absPath, strOutput)
 
     }
 

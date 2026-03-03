@@ -94,8 +94,7 @@ public class TrainingController : ControllerBase
             OverrideTableName = Globals.TrainingTableName
         };
 
-        var jobs = _dbContext.ScanAsync<TrainingJob>(null, config).GetRemainingAsync().GetAwaiter().GetResult()
-            .ToArray();
+        var jobs = (await _dbContext.ScanAsync<TrainingJob>(null, config).GetRemainingAsync()).ToArray();
 
         jobs = jobs.OrderByDescending(a => a.StartTime).ToArray();
 

@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Amazon.Lambda.Core" Version="2.1.0" />
-        <PackageReference Include="Amazon.Lambda.TestUtilities" Version="2.0.0" />
-        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.1" />
-        <PackageReference Include="AWSSDK.Rekognition" Version="3.7.5.14" />
-        <PackageReference Include="AWSSDK.SageMaker" Version="3.7.21.10" />
-        <PackageReference Include="AWSSDK.SageMakerRuntime" Version="3.7.1.51" />
+        <PackageReference Include="Amazon.Lambda.Core" Version="2.8.1" />
+        <PackageReference Include="Amazon.Lambda.TestUtilities" Version="3.0.1" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.512.1" />
+        <PackageReference Include="AWSSDK.Rekognition" Version="3.7.502.45" />
+        <PackageReference Include="AWSSDK.SageMaker" Version="3.7.529.6" />
+        <PackageReference Include="AWSSDK.SageMakerRuntime" Version="3.7.502.2" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
         <PackageReference Include="xunit" Version="2.3.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />

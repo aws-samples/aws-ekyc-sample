@@ -1,6 +1,5 @@
-import {useMutation, useQuery} from "react-query";
-import {API} from "aws-amplify";
-import {apiName} from "../../constants";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {apiGet, apiPost} from "../../apiClient";
 import axios from "axios";
 import {Buffer} from 'buffer';
 
@@ -29,46 +28,46 @@ export const uploadFile = async (url: string, toUpload: string, contentType: str
 }
 
 export const useCreateTrainingJob = () => {
-    return useMutation("createTrainingJob", async () => {
-        const response = await API.post(apiName, "/api/training/create", {})
-        return response as TrainingJob
+    return useMutation<TrainingJob, Error>({
+        mutationKey: ["createTrainingJob"],
+        mutationFn: () => apiPost<TrainingJob>("/api/training/create")
     })
 }
 const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 export const useCreateJobAndUpload = () => {
-    return useMutation("createTrainingJob", async (uploadData: { files: FileToUpload[] }) => {
-        const response = await API.post(apiName, "/api/training/create", {})
-        const job = response as TrainingJob
+    return useMutation({
+        mutationKey: ["createJobAndUpload"],
+        mutationFn: async (uploadData: { files: FileToUpload[] }) => {
+            const job = await apiPost<TrainingJob>("/api/training/create")
 
-        for (const file of uploadData.files) {
-            const urlResponse = await API.get(apiName, '/api/training/url', {
-                queryStringParameters: {
+            for (const file of uploadData.files) {
+                const urlResponse = await apiGet<string>('/api/training/url', {
                     JobId: job.id,
                     S3Key: file.name
-                }
+                })
+
+                await uploadFile(urlResponse, file.data, "image/jpeg")
+
+                // Need to slow things down so that S3 doesn't throttle us
+                await timeout(1000)
+            }
+            const arn = await apiPost<string>('/api/training/start', {
+                queryParams: {JobId: job.id}
             })
 
-            await uploadFile(urlResponse, file.data, "image/jpeg")
-
-            // Need to slow things down so that S3 doesn't throttle us
-            await timeout(1000)
+            return arn
         }
-        const arn = (await API.post(apiName, '/api/training/start', {
-            queryStringParameters: {
-                JobId: job.id
-            }
-        })) as string
-
-        return arn
     })
 }
 
 export const useGetTrainingJobs = () => {
-    return useQuery<TrainingJob[]>("getTrainingJobs", async () => {
-        return (await API.get(apiName, "/api/training/list", {}))
-            .map((a: any) => a as TrainingJob)
-            .sort((a: TrainingJob, b: TrainingJob) => b.startTime - a.startTime)
+    return useQuery<TrainingJob[]>({
+        queryKey: ["getTrainingJobs"],
+        queryFn: async () => {
+            return (await apiGet<TrainingJob[]>("/api/training/list"))
+                .sort((a, b) => b.startTime - a.startTime)
+        }
     })
 }

@@ -44,11 +44,6 @@ namespace ekyc_api.Utils
             if (request == null)
                 return false;
 
-            /*  var currentTime = Convert.ToInt64(DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds);
-  
-              if (request.expiry < currentTime)
-                  return false; */
-
             return true;
         }
 

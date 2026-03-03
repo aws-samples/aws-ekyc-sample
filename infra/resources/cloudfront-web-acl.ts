@@ -1,7 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-import {WAFV2} from 'aws-sdk';
 import {
   AwsCustomResource,
   AwsCustomResourcePolicy,
@@ -10,9 +9,14 @@ import {
 } from "aws-cdk-lib/custom-resources";
 import {Construct} from "constructs";
 
+export interface ManagedRuleGroupStatement {
+    readonly VendorName: string;
+    readonly Name: string;
+}
+
 export interface CloudFrontWebAclProps {
     readonly name: string;
-    readonly managedRules: WAFV2.ManagedRuleGroupStatement[];
+    readonly managedRules: ManagedRuleGroupStatement[];
   }
 
   /**
@@ -31,7 +35,7 @@ export interface CloudFrontWebAclProps {
       const Scope = 'CLOUDFRONT';
 
       // The parameters for creating the Web ACL
-      const createWebACLRequest: WAFV2.Types.CreateWebACLRequest = {
+      const createWebACLRequest = {
         Name: this.name,
         DefaultAction: { Allow: {} },
         Scope,
@@ -68,7 +72,7 @@ export interface CloudFrontWebAclProps {
       });
       this.webAclId = createCustomResource.getResponseField('Summary.Id');
 
-      const getWebACLRequest: WAFV2.Types.GetWebACLRequest = {
+      const getWebACLRequest = {
         Name: this.name,
         Scope,
         Id: this.webAclId,

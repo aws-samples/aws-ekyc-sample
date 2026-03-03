@@ -4,12 +4,11 @@ import os
 import boto3
 import cv2
 from PIL import Image
-from flask import jsonify
 from pytesseract import pytesseract
 
 from thai_id import extract_thai_id_front_info, extract_thai_id_back_info, card_to_dict
 
-bucket_name = os.environ("StorageBucket")
+bucket_name = os.environ.get("StorageBucket")
 
 
 def lambda_handler(event, context):
@@ -56,5 +55,5 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': json.dumps(jsonify(card_to_dict(response)))
+        'body': json.dumps(card_to_dict(response))
     }

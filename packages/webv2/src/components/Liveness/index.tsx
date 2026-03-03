@@ -1,7 +1,7 @@
 import {FC, useEffect, useState} from "react";
 import {Alert, Header, Icon, SpaceBetween} from "@cloudscape-design/components";
 import {AwsCredentialProvider, FaceLivenessDetectorCore} from '@aws-amplify/ui-react-liveness';
-import {Auth} from "aws-amplify";
+import {fetchAuthSession} from "aws-amplify/auth";
 import {v4 as uuidv4} from "uuid"
 import {FaceLivenessSessionResult, useCreateLivenessSession, useGetLivenessResult} from "../../hooks/Verification";
 
@@ -27,19 +27,17 @@ export const Liveness: FC<{
     const {
         data: createLivenessSessionResponse,
         mutate: createLivenessSession,
-        isLoading: isLoadingCreateLivenessSession,
+        isPending: isLoadingCreateLivenessSession,
         isError: isCreateLivenessSessionError
     } = useCreateLivenessSession()
 
 
     const credentialProvider: AwsCredentialProvider = async () => {
-        // Fetch the credentials
-        const creds = await Auth.currentCredentials()
-
+        const {credentials} = await fetchAuthSession();
         return {
-            accessKeyId: creds.accessKeyId,
-            secretAccessKey: creds.secretAccessKey,
-            sessionToken: creds.sessionToken
+            accessKeyId: credentials!.accessKeyId,
+            secretAccessKey: credentials!.secretAccessKey,
+            sessionToken: credentials!.sessionToken
         }
     }
 

@@ -1,52 +1,36 @@
 #!/bin/bash
 set -e
-RED='\033[1;34m'
+
+GREEN='\033[0;32m'
 NC='\033[0m'
-#### Build the API project
-printf "${GREEN}Building the API${NC}\n"
-pushd packages/ekyc-api/src/ekyc-api
-dotnet publish -c Debug
-popd
-#### Build the Ground Truth Handler Lambda
-printf "${GREEN}Building Ground Truth Handler Lambda${NC}\n"
-pushd packages/lambdas/GroundTruthJobHandler/src/GroundTruthJobHandler
-dotnet publish -c Debug
-popd
-#### Build the Check Rekognition Project Lambda
-printf "${GREEN}Building Check Rekognition Project Lambda${NC}\n"
-pushd packages/lambdas/CheckRekognitionProject/src/CheckRekognitionProject
-dotnet publish -c Debug
-popd
-#### Build the User Interface
-printf "${GREEN}Building User Interface${NC}\n"
-pushd packages/webv2
-yarn
-rm -rf build
-yarn run build
-popd
-#### Build and deploy the CDK stack
-printf "${GREEN}Synthesizing and deploying CDK stack${NC}\n"
-pushd infra
-yarn
-rm -rf output
-cdk synth --all -o output
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+#### Build all packages
+"$SCRIPT_DIR/build-all.sh"
+
+#### Deploy the CDK stack
+printf "${GREEN}Deploying CDK stack${NC}\n"
+pushd "$SCRIPT_DIR/infra"
 cdk deploy --all --require-approval never
 popd
+
 #### Copy the CDK output to the right directories
-cp infra/output.json packages/ekyc-api
-cp infra/output.json packages/PostDeploymentScripts/src
-#### Run the post deployment script
-printf "${GREEN}Executing post deployment scripts${NC}\n"
-pushd packages/PostDeploymentScripts
-yarn
-npm run start
+cp "$SCRIPT_DIR/infra/output.json" "$SCRIPT_DIR/packages/ekyc-api"
+cp "$SCRIPT_DIR/infra/output.json" "$SCRIPT_DIR/packages/PostDeploymentScripts/src"
+
+#### Run the post-deployment scripts
+printf "${GREEN}Running post-deployment scripts${NC}\n"
+pushd "$SCRIPT_DIR/packages/PostDeploymentScripts"
+pnpm run start
 popd
-#### We need to deploy the project again so that the
-#### Amplify config is updated
-printf "${GREEN}Redeploying User Interface${NC}\n"
-pushd infra
-yarn
+
+#### Redeploy so that the Amplify config is updated
+printf "${GREEN}Redeploying with updated Amplify config${NC}\n"
+pushd "$SCRIPT_DIR/infra"
 rm -rf output
 cdk synth --all -o output
 cdk deploy --all --require-approval never
 popd
+
+printf "${GREEN}Deployment complete.${NC}\n"

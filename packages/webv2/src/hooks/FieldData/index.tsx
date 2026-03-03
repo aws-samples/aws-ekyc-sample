@@ -1,18 +1,15 @@
-import {useQuery} from "react-query";
-import {API} from "aws-amplify";
-import {apiName} from "../../constants";
+import {useQuery} from "@tanstack/react-query";
+import {apiGet} from "../../apiClient";
 
 export interface DocumentType {
     name: string
     code: string
-
 }
 
 export const useGetDocumentTypes = () => {
-    return useQuery<{ name: string, code: string }[]>("documenttypes", async () => {
-        return (await API.get(apiName, "/api/document/doctypes", {}))
-            .map((a: any) => a as DocumentType)
-
+    return useQuery<DocumentType[]>({
+        queryKey: ["documenttypes"],
+        queryFn: () => apiGet<DocumentType[]>("/api/document/doctypes")
     })
 }
 

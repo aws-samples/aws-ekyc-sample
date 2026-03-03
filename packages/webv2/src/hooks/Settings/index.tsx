@@ -1,20 +1,22 @@
-import {useMutation, useQuery} from "react-query";
-import {API} from "aws-amplify";
-import {apiName} from "../../constants";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {apiGet} from "../../apiClient";
 
 export interface EkycSettings {
     RekognitionCustomLabelsProjectArn?: string
 }
 
 export const useGetSettings = () => {
-    return useQuery<EkycSettings>("getSettings", async () => {
-        return (await API.get(apiName, "/api/settings", {})) as EkycSettings
-
+    return useQuery<EkycSettings>({
+        queryKey: ["getSettings"],
+        queryFn: () => apiGet<EkycSettings>("/api/settings")
     })
 }
 
 export const useSaveSettings = () => {
-    return useMutation("saveSettings", async (settings: EkycSettings) => {
+    return useMutation({
+        mutationKey: ["saveSettings"],
+        mutationFn: async (settings: EkycSettings) => {
 
+        }
     })
 }
