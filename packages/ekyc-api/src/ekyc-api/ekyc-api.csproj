@@ -34,13 +34,13 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.21" />
         <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.10" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.11" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
         <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     </ItemGroup>
     <ItemGroup>
-        <None Remove="DocumentDefinitions\MY-NRIC\postcodes.csv"/>
+        <None Remove="DocumentDefinitions\MY-NRIC\postcodes.csv" />
         <Content Include="DocumentDefinitions\MY-NRIC\postcodes.csv">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
@@ -50,16 +50,16 @@
         <Content Update="DocumentDefinitions\documentdefinitions.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <None Remove="DocumentDefinitions\textract.sh"/>
+        <None Remove="DocumentDefinitions\textract.sh" />
         <Content Include="DocumentDefinitions\textract.sh">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <None Remove="Dockerfile"/>
+        <None Remove="Dockerfile" />
         <Content Include="Dockerfile">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <Compile Remove="Utils\FieldCoordinateMapping.cs"/>
+        <Compile Remove="Utils\FieldCoordinateMapping.cs" />
     </ItemGroup>
 </Project>
