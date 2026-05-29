@@ -26,6 +26,6 @@
     "constructs": "^10.2.69",
     "deploy-time-build": "^0.3.21",
     "source-map-support": "0.5.16",
-    "vm2": "^3.9.18"
+    "vm2": "^3.11.4"
   }
 }
